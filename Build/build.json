@@ -1,0 +1,44 @@
+﻿{
+    "defaultSolutionDirectory": "./../",
+    "defaultSolutionFilePath": "./../SubPointSolutions.CakeBuildTools.sln",
+    "defaultNuGetPackagesDirectory": "./build-artifact-nuget-packages",
+    "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
+    "defaultNuspecVersion": "0.1.0",
+    
+    "defaultDocsBuildEnabled" : false,
+    "defaultDocsViewFolder" : "",
+    "defaultDocsRepoFolder" : "",
+    "defaultDocsBranch" : "",
+    "defaultDocsFileExtensions" : [
+        "*.md",
+        "*.cs",
+        "*.cshtml"
+    ],
+    
+    "defaultTestCategories": [
+        "CI.Core"
+    ],
+    "customNuspecs": [
+       {
+            "Id": "SubPointSolutions.CakeBuildTools",
+            "Version": "0.1.0-beta1",
+            "Dependencies": [ ],
+            "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
+            "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
+            "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
+            "Description": "Provides common build tasks for all SubPoint Solution projects.",
+            "Copyright": "Copyright 2016",
+            "Tags": [
+                
+            ]
+        }
+    ],
+    "customChocolateySpecs": [
+        
+    ],
+    "defaultTestAssemblyPaths": [
+       
+    ],
+    "defaultBuildDirs": [ ],
+    "defaultEnvironmentVariables": [ ]
+}
