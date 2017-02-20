@@ -5,6 +5,14 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubPointSolutions.CakeBuildTools", "SubPointSolutions.CakeBuildTools\SubPointSolutions.CakeBuildTools.csproj", "{717B2AE5-CA7F-4933-AD5F-39D912206222}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build", "Build\Build.csproj", "{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_3rd_part", "_3rd_part", "{59FF6C36-EC04-4740-A09A-893AF17C651E}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +23,15 @@ Global
 		{717B2AE5-CA7F-4933-AD5F-39D912206222}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{717B2AE5-CA7F-4933-AD5F-39D912206222}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{717B2AE5-CA7F-4933-AD5F-39D912206222}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3692FD4D-5AB2-4A39-9E70-5A1BB1812A88} = {59FF6C36-EC04-4740-A09A-893AF17C651E}
 	EndGlobalSection
 EndGlobal
