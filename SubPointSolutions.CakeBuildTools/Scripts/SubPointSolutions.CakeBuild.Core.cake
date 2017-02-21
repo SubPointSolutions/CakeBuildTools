@@ -462,12 +462,15 @@ NuSpecDependency[] ResolveDependenciesForPackage(string id) {
 
 // CI related environment
 // * dev / beta / master versioning and publishing
-var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "dev";
+var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
 
 // override under CI run
 var ciBranchOverride = GetGlobalEnvironmentVariable("APPVEYOR_REPO_BRANCH");
 if(!String.IsNullOrEmpty(ciBranchOverride))
+{
+    Information(String.Format("Detected APPVEYOR build. Reverting to APPVEYOR_REPO_BRANCH varibale:[{0}]", ciBranchOverride));
 	ciBranch = ciBranchOverride;
+}
 
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
@@ -601,21 +604,48 @@ var defaultActionAPINuGetPackaging =Task("Action-API-NuGet-Packaging")
     }        
 });
 
+bool ShouldPublishAPINuGet(string branch) {
+
+    // always publish dev branch
+    // the rest comes from 'ciNuGetShouldPublish' -> 'ci.nuget.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciNuGetShouldPublish;
+}
+
 var defaultActionAPINuGetPublishing = Task("Action-API-NuGet-Publishing")
     // all packaged should be compiled by NuGet-Packaging task into 'defaultNuGetPackagesDirectory' folder
     .Does(() =>
 {
-    if(!ciNuGetShouldPublish) {
-        Information("Skipping NuGet publishing as ciNuGetShouldPublish is false.");
+    Information(String.Format("API NuGet publishing enabled? branch:[{0}]", ciBranch));
+	var shouldPublish = ShouldPublishAPINuGet(ciBranch);
+
+    var nugetSource = String.Empty;
+	var nugetKey = String.Empty;
+
+    if(!shouldPublish) {
+        Information("Skipping NuGet publishing.");
         return;
+    } else {
+        Information("Fetching NuGet feed creds.");
+
+        var feedSourceVariableName = String.Format("ci.nuget.{0}-source", ciBranch);
+        var feedKeyVariableName = String.Format("ci.nuget.{0}-key", ciBranch);
+
+        var feedSourceValue = GetGlobalEnvironmentVariable(feedSourceVariableName);
+        var feedKeyValue = GetGlobalEnvironmentVariable(feedKeyVariableName);
+
+        if(String.IsNullOrEmpty(feedSourceValue)) 
+            throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedSourceVariableName));
+
+        if(String.IsNullOrEmpty(feedKeyValue)) 
+            throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedKeyVariableName));
     }
 
     Information("Publishing NuGet packages to repository: [{0}]", new []{
-        ciNuGetSource
+        nugetSource
     });
-
-    var nugetSource = ciNuGetSource;
-	var nugetKey = ciNuGetKey;
 
     var nuGetPackages = System.IO.Directory.GetFiles(defaultNuGetPackagesDirectory, "*.nupkg");
 
@@ -968,4 +998,8 @@ var taskDefaultCI = Task("Default-CI")
     .IsDependentOn("Action-API-NuGet-Packaging")
     .IsDependentOn("Action-CLI-Zip-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    // always 'push'
+    // the action checks if the current branch has to be published (dev always, the rest goes via 'ci.nuget.shouldpublish')
+    .IsDependentOn("Action-API-NuGet-Publishing")
+
 	.IsDependentOn("Action-Docs-Merge");
