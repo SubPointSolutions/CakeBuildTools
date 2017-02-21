@@ -1,4 +1,4 @@
-﻿// common tooling
+// common tooling
 // always version to avoid breaking change with new releases
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.2.9
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
@@ -371,8 +371,13 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         if(packageFiles.Count() == 0)
         {
             Verbose("Adding default files - *.dll/*.xml from bin/debug");
-
+			
             var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+
+			var customProjectFolder = (string)spec["CustomProjectFolder"];
+			if(!String.IsNullOrEmpty(customProjectFolder))
+				projectPath = System.IO.Path.Combine(defaultSolutionDirectory, customProjectFolder);
+
             var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
 
             packSettings.BasePath = projectBinPath;
@@ -393,7 +398,17 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
 
             var nuSpecContentFiles = new List<NuSpecContent>();
           
-            var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+		    var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+
+            var customProjectFolder = (string)spec["CustomProjectFolder"];
+
+			if(!String.IsNullOrEmpty(customProjectFolder))
+				projectPath = System.IO.Path.Combine(defaultSolutionDirectory, customProjectFolder);
+
+			Verbose("Project path: " + projectPath);
+
+            var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
+
             packSettings.BasePath = projectPath;
 
             foreach(var packageFile in packageFiles){
