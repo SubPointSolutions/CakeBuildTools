@@ -364,21 +364,53 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         packSettings.Symbols = false;
         packSettings.NoPackageAnalysis = false;
 
-        var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
-        var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
+        // files
+        var packageFiles =  spec["Files"].ToArray();
 
-        packSettings.BasePath = projectBinPath;
+        // default files
+        if(packageFiles.Count() == 0)
+        {
+            Verbose("Adding default files - *.dll/*.xml from bin/debug");
 
-        packSettings.Files = new [] {
-                new NuSpecContent {
-                    Source = packSettings.Id + ".dll",
-                    Target = "lib/net45"
-                },
-                new NuSpecContent {
-                    Source = packSettings.Id + ".xml",
-                    Target = "lib/net45"
-                }
-        };
+            var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+            var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
+
+            packSettings.BasePath = projectBinPath;
+
+            packSettings.Files = new [] {
+                    new NuSpecContent {
+                        Source = packSettings.Id + ".dll",
+                        Target = "lib/net45"
+                    },
+                    new NuSpecContent {
+                        Source = packSettings.Id + ".xml",
+                        Target = "lib/net45"
+                    }
+            };
+        }
+        else{
+            Verbose("Adding custom files...");
+
+            var nuSpecContentFiles = new List<NuSpecContent>();
+          
+            var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+            packSettings.BasePath = projectPath;
+
+            foreach(var packageFile in packageFiles){
+
+                var target = (string)packageFile["Target"];
+
+                foreach(var srcFile in packageFile["TargetFiles"].Select(t => (string)t).ToArray())
+                {
+                    nuSpecContentFiles.Add( new NuSpecContent {
+                                Source = srcFile,
+                                Target = target
+                            });
+                }                
+            }
+
+            packSettings.Files = nuSpecContentFiles.ToArray();
+        }
 
         packSettings.OutputDirectory = new DirectoryPath(defaultNuGetPackagesDirectory);
 
