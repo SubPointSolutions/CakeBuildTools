@@ -30,6 +30,22 @@
             "Copyright": "Copyright 2016",
             "Tags": [
                 
+            ],
+
+            "Files": [
+                {
+                    "Target": "lib/net45",
+                    "TargetFiles": [
+                        "bin/debug/SubPointSolutions.CakeBuildTools.dll",
+                        "bin/debug/SubPointSolutions.CakeBuildTools.xml"
+                    ]
+                },
+                {
+                    "Target": "scripts",
+                    "TargetFiles": [
+                        "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake"
+                    ]
+                }
             ]
         }
     ],
