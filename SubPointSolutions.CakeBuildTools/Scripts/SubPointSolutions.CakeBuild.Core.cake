@@ -641,6 +641,9 @@ var defaultActionAPINuGetPublishing = Task("Action-API-NuGet-Publishing")
 
         if(String.IsNullOrEmpty(feedKeyValue)) 
             throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedKeyVariableName));
+
+        nugetSource = feedSourceValue;
+        nugetKey = feedKeyValue;
     }
 
     Information("Publishing NuGet packages to repository: [{0}]", new []{
