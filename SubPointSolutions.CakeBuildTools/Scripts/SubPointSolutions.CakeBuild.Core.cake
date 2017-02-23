@@ -1,4 +1,4 @@
-﻿// common tooling
+// common tooling
 // always version to avoid breaking change with new releases
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.2.9
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
@@ -189,13 +189,16 @@ string ResolveVersionForPackage(string id) {
     // is it choco spec?
     specs = jsonConfig["customChocolateySpecs"];
 
-    foreach(var spec in specs) {
-        var specId = (string)spec["Id"];
+	if(specs != null)
+	{
+		foreach(var spec in specs) {
+			var specId = (string)spec["Id"];
 
-        if(specId == id) {
-            return (string)spec["Version"];
-        }
-    }
+			if(specId == id) {
+				return (string)spec["Version"];
+			}
+		}
+	}
 
     throw new Exception(String.Format("Cannot resolve version for package:[{0}]. Neither customNuspecs nor customChocolateySpecs has it", id));
 }
@@ -341,6 +344,7 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
 
         packSettings.Dependencies = ResolveDependenciesForPackage(packSettings.Id);
 
+		Verbose("Adding Authors/Owners...");
         if(spec["Authors"] == null)
             packSettings.Authors =  new [] { "SubPoint Solutions" };
         else
@@ -351,13 +355,16 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         else
             packSettings.Owners = spec["Owners"].Select(t => (string)t).ToArray();
         
+		Verbose("Adding License/ProjectUrl/IconUrl...");
         packSettings.LicenseUrl = new System.Uri((string)spec["LicenseUrl"]);
         packSettings.ProjectUrl = new System.Uri((string)spec["ProjectUrl"]);
         packSettings.IconUrl = new System.Uri((string)spec["IconUrl"]);
 
+		Verbose("Adding Description/Copyright...");
         packSettings.Description = (string)spec["Description"];
         packSettings.Copyright = (string)spec["Copyright"];
 
+		Verbose("Adding tags...");
         packSettings.Tags = spec["Tags"].Select(t => (string)t).ToArray();
 
         packSettings.RequireLicenseAcceptance = false;
@@ -365,14 +372,23 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         packSettings.NoPackageAnalysis = false;
 
         // files
-        var packageFiles =  spec["Files"].ToArray();
+        var packageFilesObject =  spec["Files"];
+
+		Verbose("Adding files...");
 
         // default files
-        if(packageFiles.Count() == 0)
+        if(packageFilesObject == null || packageFilesObject.Select(t => t).Count() == 0)
         {
-            Verbose("Adding default files - *.dll/*.xml from bin/debug");
+			var packageFiles = packageFilesObject;
 
+            Verbose("Adding default files - *.dll/*.xml from bin/debug");
+			
             var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+
+			var customProjectFolder = (string)spec["CustomProjectFolder"];
+			if(!String.IsNullOrEmpty(customProjectFolder))
+				projectPath = System.IO.Path.Combine(defaultSolutionDirectory, customProjectFolder);
+
             var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
 
             packSettings.BasePath = projectBinPath;
@@ -389,11 +405,24 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
             };
         }
         else{
+			
+			var packageFiles = packageFilesObject;
+
             Verbose("Adding custom files...");
 
             var nuSpecContentFiles = new List<NuSpecContent>();
           
-            var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+		    var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
+
+            var customProjectFolder = (string)spec["CustomProjectFolder"];
+
+			if(!String.IsNullOrEmpty(customProjectFolder))
+				projectPath = System.IO.Path.Combine(defaultSolutionDirectory, customProjectFolder);
+
+			Verbose("Project path: " + projectPath);
+
+            var projectBinPath = System.IO.Path.Combine(projectPath, "bin/debug");
+
             packSettings.BasePath = projectPath;
 
             foreach(var packageFile in packageFiles){
@@ -462,12 +491,15 @@ NuSpecDependency[] ResolveDependenciesForPackage(string id) {
 
 // CI related environment
 // * dev / beta / master versioning and publishing
-var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "dev";
+var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
 
 // override under CI run
 var ciBranchOverride = GetGlobalEnvironmentVariable("APPVEYOR_REPO_BRANCH");
 if(!String.IsNullOrEmpty(ciBranchOverride))
+{
+    Information(String.Format("Detected APPVEYOR build. Reverting to APPVEYOR_REPO_BRANCH varibale:[{0}]", ciBranchOverride));
 	ciBranch = ciBranchOverride;
+}
 
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
@@ -601,21 +633,51 @@ var defaultActionAPINuGetPackaging =Task("Action-API-NuGet-Packaging")
     }        
 });
 
+bool ShouldPublishAPINuGet(string branch) {
+
+    // always publish dev branch
+    // the rest comes from 'ciNuGetShouldPublish' -> 'ci.nuget.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciNuGetShouldPublish;
+}
+
 var defaultActionAPINuGetPublishing = Task("Action-API-NuGet-Publishing")
     // all packaged should be compiled by NuGet-Packaging task into 'defaultNuGetPackagesDirectory' folder
     .Does(() =>
 {
-    if(!ciNuGetShouldPublish) {
-        Information("Skipping NuGet publishing as ciNuGetShouldPublish is false.");
+    Information(String.Format("API NuGet publishing enabled? branch:[{0}]", ciBranch));
+	var shouldPublish = ShouldPublishAPINuGet(ciBranch);
+
+    var nugetSource = String.Empty;
+	var nugetKey = String.Empty;
+
+    if(!shouldPublish) {
+        Information("Skipping NuGet publishing.");
         return;
+    } else {
+        Information("Fetching NuGet feed creds.");
+
+        var feedSourceVariableName = String.Format("ci.nuget.{0}-source", ciBranch);
+        var feedKeyVariableName = String.Format("ci.nuget.{0}-key", ciBranch);
+
+        var feedSourceValue = GetGlobalEnvironmentVariable(feedSourceVariableName);
+        var feedKeyValue = GetGlobalEnvironmentVariable(feedKeyVariableName);
+
+        if(String.IsNullOrEmpty(feedSourceValue)) 
+            throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedSourceVariableName));
+
+        if(String.IsNullOrEmpty(feedKeyValue)) 
+            throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedKeyVariableName));
+
+        nugetSource = feedSourceValue;
+        nugetKey = feedKeyValue;
     }
 
     Information("Publishing NuGet packages to repository: [{0}]", new []{
-        ciNuGetSource
+        nugetSource
     });
-
-    var nugetSource = ciNuGetSource;
-	var nugetKey = ciNuGetKey;
 
     var nuGetPackages = System.IO.Directory.GetFiles(defaultNuGetPackagesDirectory, "*.nupkg");
 
@@ -968,4 +1030,8 @@ var taskDefaultCI = Task("Default-CI")
     .IsDependentOn("Action-API-NuGet-Packaging")
     .IsDependentOn("Action-CLI-Zip-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    // always 'push'
+    // the action checks if the current branch has to be published (dev always, the rest goes via 'ci.nuget.shouldpublish')
+    .IsDependentOn("Action-API-NuGet-Publishing")
+
 	.IsDependentOn("Action-Docs-Merge");
