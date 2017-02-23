@@ -189,13 +189,16 @@ string ResolveVersionForPackage(string id) {
     // is it choco spec?
     specs = jsonConfig["customChocolateySpecs"];
 
-    foreach(var spec in specs) {
-        var specId = (string)spec["Id"];
+	if(specs != null)
+	{
+		foreach(var spec in specs) {
+			var specId = (string)spec["Id"];
 
-        if(specId == id) {
-            return (string)spec["Version"];
-        }
-    }
+			if(specId == id) {
+				return (string)spec["Version"];
+			}
+		}
+	}
 
     throw new Exception(String.Format("Cannot resolve version for package:[{0}]. Neither customNuspecs nor customChocolateySpecs has it", id));
 }
@@ -341,6 +344,7 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
 
         packSettings.Dependencies = ResolveDependenciesForPackage(packSettings.Id);
 
+		Verbose("Adding Authors/Owners...");
         if(spec["Authors"] == null)
             packSettings.Authors =  new [] { "SubPoint Solutions" };
         else
@@ -351,13 +355,16 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         else
             packSettings.Owners = spec["Owners"].Select(t => (string)t).ToArray();
         
+		Verbose("Adding License/ProjectUrl/IconUrl...");
         packSettings.LicenseUrl = new System.Uri((string)spec["LicenseUrl"]);
         packSettings.ProjectUrl = new System.Uri((string)spec["ProjectUrl"]);
         packSettings.IconUrl = new System.Uri((string)spec["IconUrl"]);
 
+		Verbose("Adding Description/Copyright...");
         packSettings.Description = (string)spec["Description"];
         packSettings.Copyright = (string)spec["Copyright"];
 
+		Verbose("Adding tags...");
         packSettings.Tags = spec["Tags"].Select(t => (string)t).ToArray();
 
         packSettings.RequireLicenseAcceptance = false;
@@ -365,11 +372,15 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
         packSettings.NoPackageAnalysis = false;
 
         // files
-        var packageFiles =  spec["Files"].ToArray();
+        var packageFilesObject =  spec["Files"];
+
+		Verbose("Adding files...");
 
         // default files
-        if(packageFiles.Count() == 0)
+        if(packageFilesObject == null || packageFilesObject.Select(t => t).Count() == 0)
         {
+			var packageFiles = packageFilesObject;
+
             Verbose("Adding default files - *.dll/*.xml from bin/debug");
 			
             var projectPath = System.IO.Path.Combine(defaultSolutionDirectory, packSettings.Id);
@@ -394,6 +405,9 @@ NuGetPackSettings[] ResolveNuGetPackSettings() {
             };
         }
         else{
+			
+			var packageFiles = packageFilesObject;
+
             Verbose("Adding custom files...");
 
             var nuSpecContentFiles = new List<NuSpecContent>();
