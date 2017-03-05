@@ -1,0 +1,22 @@
+﻿{
+    "defaultSolutionDirectory": "./../",
+    "defaultSolutionFilePath": "./../YourSolution.sln",
+    "defaultNuGetPackagesDirectory": "./build-artifact-nuget-packages",
+    "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
+    "defaultNuspecVersion": "0.1.0-beta1",
+     
+    "defaultTestCategories": [
+        "CI.Core"
+    ],
+    "customNuspecs": [
+
+    ],
+    "customChocolateySpecs": [
+       
+    ],
+    "defaultTestAssemblyPaths": [
+       
+    ],
+    "defaultBuildDirs": [ ],
+    "defaultEnvironmentVariables": [ ]
+}

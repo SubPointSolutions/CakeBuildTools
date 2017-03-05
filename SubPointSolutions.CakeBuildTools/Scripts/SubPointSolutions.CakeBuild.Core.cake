@@ -879,7 +879,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
         throw new Exception("defaultDocsFileExtensions is null or empty. Update json config with array of extensions to be added to docs");
 
         // because of some long names files - always in the root
-     var tmpDocsFolder = System.IO.Path.Combine("c:/","__m2docs");
+     var tmpDocsFolder = System.IO.Path.Combine("c:/","__sps_docs");
 
     var docsRepoFolder = System.IO.Path.GetFullPath(string.Format(@"{0}/{1}",  tmpDocsFolder, defaultDocsRepoFolder));
     var docsRepoUrl = @"https://github.com/SubPointSolutions/subpointsolutions-docs";
@@ -936,6 +936,27 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       };
 
       StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
+
+      // there must be *.sln file after check out
+      // if not - then it means we failed to connect - check out
+      var hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
+      if(!hasSolutionFile) {
+          
+		  Information(string.Format("Cannot find *.sln file in folder:[{0}]", docsRepoFolder));
+		  Information(string.Format("Cleaning folder...", docsRepoFolder));
+		  // clean up and try again
+           System.IO.Directory.Delete(docsRepoFolder, true);
+
+          // again..
+         Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
+         StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
+
+        hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
+
+        if(!hasSolutionFile) {
+            throw new Exception(String.Format("Cannot check out docs repo. Can't find solution file in folder:[{0}]", docsRepoFolder));
+        }
+      }      
 
       Information(string.Format("Merge and commit..."));
       var mergeCmd = new List<String>();
