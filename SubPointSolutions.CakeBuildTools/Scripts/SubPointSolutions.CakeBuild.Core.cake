@@ -941,18 +941,15 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       // if not - then it means we failed to connect - check out
       var hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
       if(!hasSolutionFile) {
-          // clean up and try again
+          
+		  Information(string.Format("Cannot find *.sln file in folder:[{0}]", docsRepoFolder));
+		  Information(string.Format("Cleaning folder...", docsRepoFolder));
+		  // clean up and try again
            System.IO.Directory.Delete(docsRepoFolder, true);
 
           // again..
-          Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
-        var checkoutCmd = new []{
-                string.Format("cd '{0}'", docsRepoFolder),
-                string.Format("git checkout {0}", defaultDocsBranch),
-                string.Format("git pull")
-        };
-
-        StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
+         Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
+         StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
 
         hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
 
