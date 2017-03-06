@@ -885,7 +885,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
     var docsRepoUrl = @"https://github.com/SubPointSolutions/subpointsolutions-docs";
 
     var dstDocsPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/Views", docsRepoFolder);
-	var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/SampleFiles", docsRepoFolder);
+	var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
 
     var docsEnvironmentVars = new [] {
         "ci.docs.username",
