@@ -990,7 +990,17 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("git push {0}", docsRepoPushUrl)
       };
 
-      var res = StartPowershellScript(string.Join(Environment.NewLine, pushCmd), new PowershellSettings()
+	  // writing a temporary PS file to avoid creds exposure in the build output
+      var pushCmdFilePath = System.IO.Path.GetTempFileName() + ".ps1";
+      System.IO.File.WriteAllLines(pushCmdFilePath, pushCmd);
+
+	  //   var res = StartPowershellScript(string.Join(Environment.NewLine, pushCmd), new PowershellSettings()
+	  //   {
+	  //         LogOutput = false,
+	  //         OutputToAppConsole  = false
+	  //   });
+
+      var res = StartPowershellFile(pushCmdFilePath, new PowershellSettings()
       {
             LogOutput = false,
             OutputToAppConsole  = false
