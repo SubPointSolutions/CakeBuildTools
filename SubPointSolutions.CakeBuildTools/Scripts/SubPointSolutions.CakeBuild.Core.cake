@@ -987,6 +987,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       var pushCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
             string.Format("git config http.sslVerify false"),
+			string.Format("git config --global push.default simple"),
             string.Format("git push {0}", docsRepoPushUrl)
       };
 
