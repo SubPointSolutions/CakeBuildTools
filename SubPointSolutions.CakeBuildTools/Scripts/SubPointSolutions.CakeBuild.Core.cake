@@ -857,7 +857,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
     if(String.IsNullOrEmpty(defaultDocsViewFolder))
         throw new Exception("defaultDocsViewFolder is null or empty. Update json config");
 
-     var defaultDocsRepoFolder = (string)jsonConfig["defaultDocsRepoFolder"];
+    var defaultDocsRepoFolder = (string)jsonConfig["defaultDocsRepoFolder"];
     if(String.IsNullOrEmpty(defaultDocsRepoFolder))
         throw new Exception("defaultDocsRepoFolder is null or empty. Update json config");
 
@@ -885,6 +885,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
     var docsRepoUrl = @"https://github.com/SubPointSolutions/subpointsolutions-docs";
 
     var dstDocsPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/Views", docsRepoFolder);
+	var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
 
     var docsEnvironmentVars = new [] {
         "ci.docs.username",
@@ -964,6 +965,15 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       mergeCmd.Add(string.Format("cd '{0}'", docsRepoFolder));
       mergeCmd.Add(string.Format("copy-item  '{0}' '{1}' -Recurse -Force", srcDocsPath,  dstDocsPath));
 
+	  // copying samples
+	  var defaultDocsSampleFilesFolder = (string)jsonConfig["defaultDocsSampleFilesFolder"];
+
+	  if(!String.IsNullOrEmpty(defaultDocsSampleFilesFolder))
+	  {
+		var defaultDocsSampleFilesFolderFullPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(defaultSolutionDirectory,defaultDocsSampleFilesFolder));
+		mergeCmd.Add(string.Format("copy-item  '{0}' '{1}' -Recurse -Force", defaultDocsSampleFilesFolderFullPath,  dstDocsSamplesPath));
+	  }
+
       foreach(var defaultDocsFileExtension in defaultDocsFileExtensions) {
         Verbose(String.Format(" - adding extension:[{0}]",defaultDocsFileExtension));
         mergeCmd.Add(string.Format("git add {0} -f", defaultDocsFileExtension));
@@ -980,7 +990,17 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("git push {0}", docsRepoPushUrl)
       };
 
-      var res = StartPowershellScript(string.Join(Environment.NewLine, pushCmd), new PowershellSettings()
+	  // writing a temporary PS file to avoid creds exposure in the build output
+      var pushCmdFilePath = System.IO.Path.GetTempFileName() + ".ps1";
+      System.IO.File.WriteAllLines(pushCmdFilePath, pushCmd);
+
+	  //   var res = StartPowershellScript(string.Join(Environment.NewLine, pushCmd), new PowershellSettings()
+	  //   {
+	  //         LogOutput = false,
+	  //         OutputToAppConsole  = false
+	  //   });
+
+      var res = StartPowershellFile(pushCmdFilePath, new PowershellSettings()
       {
             LogOutput = false,
             OutputToAppConsole  = false
