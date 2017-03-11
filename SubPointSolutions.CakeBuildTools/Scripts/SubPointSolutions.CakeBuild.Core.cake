@@ -4,6 +4,8 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
 
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta4");
+
 // variables
 // * defaultXXX - shared, common settings from json config
 var target = Argument("target", "Default");
@@ -987,6 +989,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       var pushCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
             string.Format("git config http.sslVerify false"),
+			string.Format("git config --global push.default simple"),
             string.Format("git push {0}", docsRepoPushUrl)
       };
 
