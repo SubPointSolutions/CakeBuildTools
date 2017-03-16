@@ -1266,7 +1266,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
         var cloneCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git clone -b {1} {0}", docsRepoUrl, defaultDocsBranch)
+            string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
         };
 
         StartPowershellScript(string.Join(Environment.NewLine, cloneCmd));  
@@ -1277,8 +1277,8 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
      Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
      var checkoutCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git checkout {0}", defaultDocsBranch),
-            string.Format("git pull")
+            string.Format("git checkout {0} --quiet > null 2>&1", defaultDocsBranch),
+            string.Format("git pull --quiet > null 2>&1")
       };
 
       StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
@@ -1324,7 +1324,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
         mergeCmd.Add(string.Format("git add {0} -f", defaultDocsFileExtension));
       }
 
-      mergeCmd.Add(string.Format("git commit -m '{0}'", commitName));
+      mergeCmd.Add(string.Format("git commit -m '{0}' --quiet > null 2>&1", commitName));
 
       StartPowershellScript(string.Join(Environment.NewLine, mergeCmd)); 
 
