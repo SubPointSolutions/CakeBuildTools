@@ -4,7 +4,16 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta4");
+#tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
+#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
+
+#reference "tools/Octokit/lib/net45/Octokit.dll"
+#reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.dll"
+#reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.WebRequest.dll"
+#reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
+#reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
+
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta5");
 
 // variables
 // * defaultXXX - shared, common settings from json config
@@ -29,13 +38,338 @@ string GetGlobalEnvironmentVariable(string name) {
     return result;
 }
 
+public class Release
+    {
+        public Release()
+        {
+            ReleaseIssueGroups = new List<ReleaseIssueGroup>();
+        }
+
+        public string ReleaseTitle { get; set; }
+        public string ReleaseVersion { get; set; }
+        public string ReleaseMonth { get; set; }
+
+        public string ReleaseSummary { get; set; }
+
+        public List<ReleaseIssueGroup> ReleaseIssueGroups { get; set; }
+
+
+        public string RegressionTestNotes { get; set; }
+
+        public string AssemblyFileVersion { get; set; }
+
+        public ReleaseIssue TmpIssue { get; set; }
+        public string ReleaseMonthAndYear { get; set; }
+
+        public string ProjectName {get;set;}
+        public string CompanyName {get;set;}
+    }
+
+public class ReleaseIssueGroup
+    {
+        public ReleaseIssueGroup()
+        {
+            Issues = new List<ReleaseIssue>();
+        }
+
+        public string Label { get; set; }
+        public string LabelTitle { get; set; }
+
+        public List<ReleaseIssue> Issues { get; set; }
+    }
+
+    public class ReleaseIssue
+    {
+        public string Title { get; set; }
+        public int Number { get; set; }
+        public string Url { get; set; }
+    }
+
+public class GiHubService {
+
+ public GiHubService() {
+
+     AppName = "SubPointSolutions.CakeBuildTools";
+ }
+
+    public string AppName { get; set; }
+
+        public string UserName { get; set; }
+        public string UserPassword { get; set; }
+
+        protected Octokit.GitHubClient GClient { get; set; }
+
+ public void EnsurePreRelease(
+            string repositoryOwner, 
+            string repositoryName,
+            string releaseTag,
+            string branchName,
+            string releaseName,
+            string releaseContent,
+            bool publish)
+        {
+            var isDraft = !publish;
+
+            WithG(client =>
+            {
+                var allReleases = client.Repository.Release.GetAll(repositoryOwner, repositoryName).Result;
+                var existingRelease = allReleases.FirstOrDefault(r => r.Name == releaseName);
+
+                if (existingRelease == null)
+                {
+                    var release = client.Repository.Release.Create(repositoryOwner, repositoryName, new Octokit.NewRelease(releaseTag)
+                    {
+                        Draft = isDraft,
+                        Name = releaseName,
+                        TargetCommitish = branchName,
+                        Body = releaseContent
+                    }).Result;
+                }
+                else
+                {
+                    var updatableRelease = existingRelease.ToUpdate();
+
+                    updatableRelease.TagName = releaseTag;
+                    updatableRelease.TargetCommitish = branchName;
+
+                    updatableRelease.Body = releaseContent;
+                    updatableRelease.Draft = isDraft;
+
+                    var tmp = client.Repository.Release.Edit(repositoryOwner, repositoryName, existingRelease.Id, updatableRelease).Result;
+                }
+            });
+        }
+
+     protected virtual void InitGClient()
+        {
+            if (GClient == null)
+                GClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue(AppName));
+
+                var basicAuth = new Octokit.Credentials(UserName, UserPassword);
+                GClient.Credentials = basicAuth;
+        }
+
+        protected virtual void WithG(Action<Octokit.GitHubClient> action)
+        {
+            InitGClient();
+
+            action(GClient);
+        }
+
+
+    public List<Octokit.Issue> GetClosedIssuesInOpenedMilistones(string company, string repo)
+        {
+            return GetClosedIssuesInOpenedMilistones(company, repo, DateTimeOffset.Now.AddDays(8).DateTime);
+        }
+
+        public List<Octokit.Issue> GetClosedIssuesInOpenedMilistones(string company, string repo, DateTimeOffset nowDate)
+        {
+            var result = new List<Octokit.Issue>();
+
+            WithG(client =>
+            {
+                var allMilestones = client.Issue.Milestone
+                                      .GetAllForRepository(company, repo, new Octokit.MilestoneRequest
+                                      {
+                                          State = Octokit.ItemStateFilter.Open
+                                      })
+                                      .Result;
+
+                var activeMilestones = allMilestones.Where(m => !m.ClosedAt.HasValue && m.DueOn <= nowDate)
+                                                    .OrderBy(m => m.DueOn);
+
+                var allClosedIssues = client.Issue.GetAllForRepository(company, repo, new Octokit.RepositoryIssueRequest
+                {
+                    State = Octokit.ItemStateFilter.Closed
+                }).Result.ToList();
+
+                foreach (var milestone in activeMilestones)
+                {
+                    foreach (var issue in allClosedIssues)
+                    {
+                        if (issue.Milestone != null &&
+                            issue.Milestone.Title == milestone.Title)
+                        {
+                            if (issue.ClosedAt.HasValue)
+                            {
+                                result.Add(issue);
+                            }
+                        }
+                    }
+                }
+            });
+
+            return result;
+        }
+
+}
+
+string CreateGitHubReleaseNotes(
+        string githubCompanyName,
+        string githubRepositoryName,
+
+        string githubUserName,
+        string githubUserPassword,
+
+        string releaseTitle,
+        string releaseVersion,
+
+        string releaseAssemblyFileVersion,
+        string releaseTemplateFileName,
+        string releaseLabels
+        
+        ) {
+
+            var useCache = false;
+            var cacheFile = "release-cake.cache";
+
+            var releaseData = new Release();
+
+            releaseData.CompanyName = githubCompanyName;
+            releaseData.ProjectName = releaseTitle;
+            
+            var githubAppName = "SubPointSolutions.CakeBuildTools";
+
+            // var releaseLabels = string.Join(";", new string[]
+            // {
+            //     "new definition,New Definition",
+            //     "bug,Fixes",
+            //     "enhancement,Enhancements",
+            //     "wontfix,"
+            // });
+
+            Information("Creating GitHub service...");
+
+            var githubService = new GiHubService();
+
+            githubService.AppName = githubAppName;
+
+            githubService.UserName = githubUserName;
+            githubService.UserPassword = githubUserPassword;
+
+            if (System.IO.File.Exists(cacheFile) && useCache)
+            {
+                //releaseData = XmlSerializerUtils.DeserializeFromString<Release>(System.IO.File.ReadAllText(cacheFile));
+            }
+            else
+            {
+                var allowedIssueGroupLabels = releaseLabels.Split(';').Select(l => l.Split(',')[0]).ToList();
+                var allowedIssueGroupLabelTitles = releaseLabels.Split(';').Select(l => l.Split(',')[1]).ToList();
+
+                Information("Fetching closed issues...");
+
+                var issues = new List<Octokit.Issue>();
+                issues.AddRange(githubService.GetClosedIssuesInOpenedMilistones(githubCompanyName, githubRepositoryName));
+                issues = issues.OrderByDescending(i => i.Number).ToList();
+
+                foreach (var issue in issues)
+                {
+                    if (!issue.Labels.Any(l => allowedIssueGroupLabels.Contains(l.Name)))
+                    {
+                        throw new Exception(string.Format(
+                            "Issue #{0} [{1}] [{2}] should have one of the following tags:[{3}]",
+                            new object[] {
+                            issue.Id, issue.Title, issue.Url,
+                            string.Join(",", allowedIssueGroupLabels.ToArray()) }));
+                    }
+                }
+
+                Information("Creating release groups...");
+                var releaseIssueGroups = new List<ReleaseIssueGroup>();
+
+                var index = 0;
+
+                foreach (var allowedIssueLabel in allowedIssueGroupLabels)
+                {
+                    var issueGroupTitle = allowedIssueGroupLabelTitles[index++];
+
+                    if (string.IsNullOrEmpty(issueGroupTitle))
+                        continue;
+
+                    releaseIssueGroups.Add(new ReleaseIssueGroup
+                    {
+                        Label = allowedIssueLabel,
+                        LabelTitle = issueGroupTitle,
+                        Issues = issues.Where(i => i.Labels.Any(l => l.Name == allowedIssueLabel))
+                     .Select(i => new ReleaseIssue
+                     {
+                         Title = i.Title,
+                         Url = string.Format("https://github.com/{0}/{1}/issues/{2}",
+                                                githubCompanyName,
+                                                githubRepositoryName,
+                                                i.Number),
+                         Number = i.Number
+                     }).ToList()
+                    });
+                }
+
+                releaseData.ReleaseIssueGroups = releaseIssueGroups;
+
+                //var cache = XmlSerializerUtils.SerializeToString(releaseData);
+                //System.IO.File.WriteAllText(cacheFile, cache);
+            }
+
+            Information("Filling release metadata...");
+            releaseData.ReleaseMonthAndYear = string.Format("{0} {1}",
+                                                DateTime.Now.ToString("MMMM"),
+                                                DateTime.Now.Year);
+
+            releaseData.ReleaseTitle = string.Format("{0}", releaseTitle);
+            releaseData.ReleaseVersion = releaseVersion;
+            releaseData.AssemblyFileVersion = releaseAssemblyFileVersion;
+
+            Information("Fetching release notes template file:" + releaseTemplateFileName);
+            var templateContent = System.IO.File.ReadAllText(releaseTemplateFileName);
+
+            Information("Generating release notes...");
+            var result = RazorEngine.Templating.RazorEngineServiceExtensions.RunCompile(RazorEngine.Engine.Razor, templateContent, "templateKey", null, releaseData);
+
+            var releaseNotes = result;
+            var fileName = string.Format("release-notes-{0}.md", releaseVersion);
+
+            Information("Saving release notes to file: " + fileName);
+            System.IO.File.WriteAllText(fileName, releaseNotes);
+
+            
+
+            var githubReleaseNotesBranch = ciBranch == "master" ? "master" : "beta";
+            var githubReleaseNotesTitle = string.Format("{0} {1}, {2}", releaseTitle, releaseVersion, releaseData.ReleaseMonthAndYear);
+
+            Information("Updating GitHub pre-release:" + githubReleaseNotesTitle);
+
+            Verbose("   -githubCompanyName:" + githubCompanyName);
+            Verbose("   -githubRepositoryName:" + githubRepositoryName);
+            Verbose("   -releaseVersion:" + releaseVersion);
+            Verbose("   -githubReleaseNotesBranch:" + githubReleaseNotesBranch);
+            Verbose("   -releaseVersion:" + releaseVersion);
+
+            if(ciGitHubShouldPublish) {
+                Information("[!] Release will be published:" + githubReleaseNotesTitle);
+            } else {
+                Information("Release in draft:" + githubReleaseNotesTitle);
+            }
+
+            githubService.EnsurePreRelease(
+                        githubCompanyName,
+                        githubRepositoryName,
+                        releaseVersion,
+                        githubReleaseNotesBranch,
+                        githubReleaseNotesTitle,
+                        releaseNotes,
+                        ciGitHubShouldPublish);
+
+            return fileName;
+}
+
+string GetVersionForNuGetPackage(string id) {
+    return GetVersionForNuGetPackage(id, ciBranch);
+}
+
 // get package id from json config
 // dev - [json-id.-alpha+year+DayOfYear+Hour+Minute]
 // beta - always from json config
-string GetVersionForNuGetPackage(string id) {
+string GetVersionForNuGetPackage(string id, string branch) {
     
-    var branch = ciBranch;
-
     var resultVersion = string.Empty;
     var jsonPackageVersion = ResolveVersionForPackage(id); 
 
@@ -506,6 +840,8 @@ if(!String.IsNullOrEmpty(ciBranchOverride))
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
 var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
+
+var ciGitHubShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.github.shouldpublish") ?? "FALSE");
 
 // source solution dir and file
 var defaultSolutionDirectory =  GetFullPath((string)jsonConfig["defaultSolutionDirectory"]); 
@@ -1012,6 +1348,83 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
       Information(string.Format("Completed docs merge.")); 
 });
 
+var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
+    .Does(() => {
+
+    Information("Building GitHub release notes...");
+
+    string githubCompanyName = GetGlobalEnvironmentVariable("ci.github.companyname");
+    string githubRepositoryName = GetGlobalEnvironmentVariable("ci.github.repositoryname");
+    string githubUserName = GetGlobalEnvironmentVariable("ci.github.username");
+    string githubUserPassword = GetGlobalEnvironmentVariable("ci.github.userpassword");
+    
+    string releaseTitle = GetGlobalEnvironmentVariable("ci.github.releasetitle");
+    string releaseVersion = GetGlobalEnvironmentVariable("ci.github.releaseversion");
+    string releaseAssemblyFileVersion = GetGlobalEnvironmentVariable("ci.github.releaseAssemblyFileVersion");
+    
+    string releaseTemplateFileName = GetGlobalEnvironmentVariable("ci.github.releaseTemplateFileName");
+    
+    if(string.IsNullOrEmpty(releaseTemplateFileName))
+        releaseTemplateFileName = "github-release-notes.chtml";
+
+    string releaseLabels = GetGlobalEnvironmentVariable("ci.github.releaseLabels");
+
+    if(string.IsNullOrEmpty(githubCompanyName))
+        throw new Exception("githubCompanyName");
+
+    if(string.IsNullOrEmpty(githubRepositoryName))
+        throw new Exception("githubRepositoryName");        
+
+    if(string.IsNullOrEmpty(githubUserName))
+        throw new Exception("githubUserName");        
+
+    if(string.IsNullOrEmpty(githubUserPassword))
+        throw new Exception("githubUserPassword");        
+
+    if(string.IsNullOrEmpty(releaseLabels))
+        throw new Exception("releaseLabels");        
+
+    if(String.IsNullOrEmpty(releaseTitle))
+    {
+        releaseTitle = System.IO.Path.GetFileNameWithoutExtension(defaultSolutionFilePath);
+    }
+
+    if(String.IsNullOrEmpty(releaseVersion) && defaultNuspecs.Count > 0)
+    {
+        var nuSpec = defaultNuspecs.First();
+        
+        var id = nuSpec.Id; 
+        var version = nuSpec.Version; 
+
+        if(ciBranch != "master")
+            releaseVersion = GetVersionForNuGetPackage(id, "beta");
+        else
+            releaseVersion = GetVersionForNuGetPackage(id, ciBranch);
+    }
+
+    Information(String.Format("-githubCompanyName:[{0}]",githubCompanyName));
+    Information(String.Format("-githubRepositoryName:[{0}]", githubRepositoryName));
+
+    Information(String.Format("-releaseTemplateFileName:[{0}]", releaseTemplateFileName));
+    Information(String.Format("-releaseLabels:[{0}]", releaseLabels));
+
+    var releaseNotesFilePath = CreateGitHubReleaseNotes(
+        githubCompanyName,
+        githubRepositoryName,
+
+        githubUserName,
+        githubUserPassword,
+
+        releaseTitle,
+        releaseVersion,
+
+        releaseAssemblyFileVersion,
+
+        releaseTemplateFileName,
+        releaseLabels
+    );
+});
+
 // Action-XXX - common tasks
 // * Action-Validate-Environment
 // * Action-Clean
@@ -1027,6 +1440,8 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
 // * Action-CLI-Chocolatey-Packaging
 // * Action-CLI-Chocolatey-Publishing
+
+// * Action-GitHub-ReleaseNotes
 
 // basic common targets
 // expose them as global vars by naming conventions
@@ -1077,5 +1492,8 @@ var taskDefaultCI = Task("Default-CI")
     // always 'push'
     // the action checks if the current branch has to be published (dev always, the rest goes via 'ci.nuget.shouldpublish')
     .IsDependentOn("Action-API-NuGet-Publishing")
+	
+	// always create a new release - either in draft or published as per 'ci.github.shouldpublish' variable
+	.IsDependentOn("Action-GitHub-ReleaseNotes")
 
 	.IsDependentOn("Action-Docs-Merge");
