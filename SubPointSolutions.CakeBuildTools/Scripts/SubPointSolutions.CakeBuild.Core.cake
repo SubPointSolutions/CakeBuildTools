@@ -1333,7 +1333,8 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("cd '{0}'", docsRepoFolder),
             string.Format("git config http.sslVerify false"),
 			string.Format("git config --global push.default simple"),
-            string.Format("git push {0}", docsRepoPushUrl)
+            string.Format("git push {0} --quiet > null 2>&1", docsRepoPushUrl),
+			string.Format("return $LASTEXITCODE")
       };
 
 	  // writing a temporary PS file to avoid creds exposure in the build output
