@@ -26,6 +26,6 @@ if (items.Count > 0)
 }
 
 ### Feature requests, support and contributions
-This is an internal project of [SubPointSolutions](http://subpointsolutions.com), but you are welcome to use it as you wish. In case you have unexpected issues, feedback or keen to see new features, please open up a new issue directly at [GitHub issue tracker](https://github.com/@Model.CompanyName/@Model.ProjectName/issues).
+This is an internal project of [SubPointSolutions](http://subpointsolutions.com), but you are welcome to use it as you wish. In case you have unexpected issues, feedback or keen to see new features, please open up a new issue directly at [GitHub issue tracker](https://github.com/SubPointSolutions/CakeBuildTools/issues).
 
-* [GitHub issue tracker](https://github.com/@Model.CompanyName/@Model.ProjectName/issues)
+* [GitHub issue tracker](https://github.com/SubPointSolutions/CakeBuildTools/issues)
