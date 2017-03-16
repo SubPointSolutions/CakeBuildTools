@@ -322,7 +322,13 @@ string CreateGitHubReleaseNotes(
             var templateContent = System.IO.File.ReadAllText(releaseTemplateFileName);
 
             Information("Generating release notes...");
-            var result = RazorEngine.Templating.RazorEngineServiceExtensions.RunCompile(RazorEngine.Engine.Razor, templateContent, "templateKey", null, releaseData);
+
+			var templateConfig = new RazorEngine.Configuration.TemplateServiceConfiguration();
+			templateConfig.DisableTempFileLocking = true;
+
+			var razorEngine = RazorEngine.Templating.RazorEngineService.Create(templateConfig);
+
+            var result = RazorEngine.Templating.RazorEngineServiceExtensions.RunCompile(razorEngine, templateContent, "templateKey", null, releaseData);
 
             var releaseNotes = result;
             var fileName = string.Format("release-notes-{0}.md", releaseVersion);
