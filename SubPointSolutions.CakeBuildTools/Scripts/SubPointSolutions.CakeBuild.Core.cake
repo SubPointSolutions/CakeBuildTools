@@ -325,6 +325,7 @@ string CreateGitHubReleaseNotes(
 
 			var templateConfig = new RazorEngine.Configuration.TemplateServiceConfiguration();
 			templateConfig.DisableTempFileLocking = true;
+			templateConfig.CachingProvider = new RazorEngine.Templating.DefaultCachingProvider(t => {}); //disables the warnings
 
 			var razorEngine = RazorEngine.Templating.RazorEngineService.Create(templateConfig);
 
