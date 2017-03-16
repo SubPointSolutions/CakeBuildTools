@@ -85,6 +85,8 @@ Common build script provides cake tasks with the following name convention:
 |   | Action-Docs-Publishing  |
 |   | Action-Validate-Environment  |
 | | Action-Restore-NuGet-Packages |
+| | Action-GitHub-ReleaseNotes |
+| | Action-Docs-Merge |
 | Default  | Action-Clean <br/> Action-Build <br/> Action-Run-UnitTests   |
 | Default-Build  | Action-Clean <br/> Action-Build    |
 | Default-Clean  | Action-Clean    |
@@ -94,7 +96,7 @@ Common build script provides cake tasks with the following name convention:
 | Default-CLI  | Action-Clean<br/>Action-Build<br/>Action-Run-UnitTests<br/>Action-API-NuGet-Packaging<br/>Action-CLI-Zip-Packaging<br/>Action-CLI-Chocolatey-Packaging   |
 | Default-CLI-Publishing | Action-Clean<br/>Action-Build<br/>Action-Run-UnitTests<br/>Action-API-NuGet-Packaging<br/>Action-CLI-Zip-Packaging<br/>Action-CLI-Chocolatey-Packaging<br/>Action-CLI-Zip-Publishing<br/>Action-CLI-Chocolatey-Publishing   |
 | Default-Desktop  | TBD  |
-| Default-CI  | Action-Clean<br/>Action-Build<br/>Action-Run-UnitTests<br/>Action-API-NuGet-Packaging<br/>Action-CLI-Zip-Packaging<br/>Action-CLI-Chocolatey-Publishing |
+| Default-CI  | Action-Clean<br/>Action-Build<br/>Action-Run-UnitTests<br/>Action-API-NuGet-Packaging<br/>Action-CLI-Zip-Packaging<br/>Action-CLI-Chocolatey-Publishing<br/>Action-GitHub-ReleaseNotes<br/>Action-Docs-Merge |
 
 #### Rule 5 - simple build is done with build.json config
 All build configiration is to be driven from the build.json config.
