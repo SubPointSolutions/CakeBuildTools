@@ -6,4 +6,5 @@ build_script:
     - ps: c:\prj\Build\build.ps1 -Verbosity Minimal -Target "Default-CI"
 
 artifacts:
-    - path: '**\*.nupkg'
+    - path: '**\build-artifact-nuget-packages\*.nupkg'
+    - path: '**\build-artifact-cli-packages\*.nupkg'
