@@ -1417,6 +1417,11 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
             releaseVersion = GetVersionForNuGetPackage(id, ciBranch);
     }
 
+	if(String.IsNullOrEmpty(releaseVersion))
+	{
+		throw new Exception("releaseVersion is null or empty. Can't get it from 'ci.github.releaseversion' or any of NuSpec files");
+	}
+
     Information(String.Format("-githubCompanyName:[{0}]",githubCompanyName));
     Information(String.Format("-githubRepositoryName:[{0}]", githubRepositoryName));
 
