@@ -1273,7 +1273,8 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
         var cloneCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
+            //string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
+			string.Format("git clone -b {1} {0} --quiet", docsRepoUrl, defaultDocsBranch)
         };
 
         StartPowershellScript(string.Join(Environment.NewLine, cloneCmd));  
