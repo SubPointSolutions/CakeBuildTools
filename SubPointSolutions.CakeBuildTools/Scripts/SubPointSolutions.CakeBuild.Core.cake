@@ -3,6 +3,7 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.2.9
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet&Version=0.4.0
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
@@ -13,7 +14,13 @@
 #reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta5");
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+
+Setup(ctx => {
+	Information(Figlet("SubPointSolutions'"));
+    Information(Figlet("CakeBuildTools"));
+	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+});
 
 // variables
 // * defaultXXX - shared, common settings from json config
@@ -1410,6 +1417,11 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
             releaseVersion = GetVersionForNuGetPackage(id, ciBranch);
     }
 
+	if(String.IsNullOrEmpty(releaseVersion))
+	{
+		throw new Exception("releaseVersion is null or empty. Can't get it from 'ci.github.releaseversion' or any of NuSpec files");
+	}
+
     Information(String.Format("-githubCompanyName:[{0}]",githubCompanyName));
     Information(String.Format("-githubRepositoryName:[{0}]", githubRepositoryName));
 
@@ -1464,6 +1476,7 @@ var taskDefaultClean = Task("Default-Clean")
 
 var taskDefaultBuild = Task("Default-Build")
     .IsDependentOn("Default-Clean")
+	.IsDependentOn("Action-Restore-NuGet-Packages")
     .IsDependentOn("Action-Build");
 
 var taskDefaultRunUnitTests = Task("Default-Run-UnitTests")
