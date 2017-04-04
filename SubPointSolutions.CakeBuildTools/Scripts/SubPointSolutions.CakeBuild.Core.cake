@@ -1404,6 +1404,7 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
         releaseTitle = System.IO.Path.GetFileNameWithoutExtension(defaultSolutionFilePath);
     }
 
+	// get releaseVersion from one of the defaultNuspecs?
     if(String.IsNullOrEmpty(releaseVersion) && defaultNuspecs.Count > 0)
     {
         var nuSpec = defaultNuspecs.First();
@@ -1417,9 +1418,13 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
             releaseVersion = GetVersionForNuGetPackage(id, ciBranch);
     }
 
+	// fall back on defaultNuspecVersion
+	if(String.IsNullOrEmpty(releaseVersion))
+		releaseVersion = defaultNuspecVersion;
+
 	if(String.IsNullOrEmpty(releaseVersion))
 	{
-		throw new Exception("releaseVersion is null or empty. Can't get it from 'ci.github.releaseversion' or any of NuSpec files");
+		throw new Exception("releaseVersion is null or empty. Can't get it from 'ci.github.releaseversion', any of NuSpec files or defaultNuspecVersion");
 	}
 
     Information(String.Format("-githubCompanyName:[{0}]",githubCompanyName));
