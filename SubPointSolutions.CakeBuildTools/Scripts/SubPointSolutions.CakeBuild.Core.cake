@@ -853,7 +853,9 @@ if(!String.IsNullOrEmpty(ciBranchOverride))
 
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
+
 var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
+var ciChocolateyShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.chocolatey.shouldpublish") ?? "FALSE");
 
 var ciGitHubShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.github.shouldpublish") ?? "FALSE");
 
@@ -995,6 +997,16 @@ bool ShouldPublishAPINuGet(string branch) {
 	return ciNuGetShouldPublish;
 }
 
+bool ShouldPublishChocolatey(string branch) {
+   
+    // always publish dev branch
+    // the rest comes from 'ciChocolateyShouldPublish' -> 'ci.chocolatey.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciChocolateyShouldPublish;
+}
+
 var defaultActionAPINuGetPublishing = Task("Action-API-NuGet-Publishing")
     // all packaged should be compiled by NuGet-Packaging task into 'defaultNuGetPackagesDirectory' folder
     .Does(() =>
@@ -1079,6 +1091,77 @@ var defaultActionCLIChocolateyPackaging = Task("Action-CLI-Chocolatey-Packaging"
        }
 
       Information(string.Format("Completed creating chocolatey package"));
+});
+
+
+
+var defaultActionCLIChocolateyPublishing = Task("Action-CLI-Chocolatey-Publishing")
+    .Does(() =>
+{
+        Information(String.Format("CLI Chocolatey publishing enabled? branch:[{0}]", ciBranch));
+        var shouldPublish = ShouldPublishChocolatey(ciBranch);
+
+        var nugetSource = String.Empty;
+        var nugetKey = String.Empty;
+
+        if(!shouldPublish) {
+            Information("Skipping Chocolatey publishing.");
+            return;
+        } else {
+            Information("Fetching Chocolatey NuGet feed creds.");
+
+            var feedSourceVariableName = String.Format("ci.chocolatey.{0}-source", ciBranch);
+            var feedKeyVariableName = String.Format("ci.chocolatey.{0}-key", ciBranch);
+
+            var feedSourceValue = GetGlobalEnvironmentVariable(feedSourceVariableName);
+            var feedKeyValue = GetGlobalEnvironmentVariable(feedKeyVariableName);
+
+            if(String.IsNullOrEmpty(feedSourceValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedSourceVariableName));
+
+            if(String.IsNullOrEmpty(feedKeyValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedKeyVariableName));
+
+            nugetSource = feedSourceValue;
+            nugetKey = feedKeyValue;
+        }
+
+        Information("Publishing Chocolatey packages to repository: [{0}]", new []{
+            nugetSource
+        });
+
+        var nuGetPackages = System.IO.Directory.GetFiles(defaultChocolateyPackagesDirectory, "*.nupkg");
+
+        foreach(var packageFilePath in nuGetPackages)
+            {
+                var packageFileName = System.IO.Path.GetFileName(packageFilePath);
+
+                if(System.IO.File.Exists(packageFilePath)) {
+                    
+                    // checking is publushed
+                    Information(string.Format("Checking if Chocolatey NuGet package [{0}] is already published", packageFileName));
+                    
+                    // TODO
+                    var isNuGetPackagePublished = false;
+                    if(!isNuGetPackagePublished)
+                    {
+                        Information(string.Format("Publishing Chocolatey NuGet package [{0}]...", packageFileName));
+                    
+                        ChocolateyPush(packageFilePath, new NuGetPushSettings {
+                            Source = nugetSource,
+                            ApiKey = nugetKey
+                        });
+                    }
+                    else
+                    {
+                        Information(string.Format("Chocolatey NuGet package [{0}] was already published", packageFileName));
+                    }                 
+                    
+                } else {
+                    Information(string.Format("Chocolatey NuGet package does not exist:[{0}]", packageFilePath));
+                    throw new ArgumentException(string.Format("Chocolatey NuGet package does not exist:[{0}]", packageFilePath));
+                }
+            }           
 });
 
 var defaultActionCLIZipPackaging = Task("Action-CLI-Zip-Packaging")
@@ -1505,22 +1588,30 @@ var taskDefaultCLIPackaging = Task("Default-CLI-Packaging")
     .IsDependentOn("Action-API-NuGet-Packaging")
 
     .IsDependentOn("Action-CLI-Zip-Packaging")
-    .IsDependentOn("Action-CLI-Chocolatey-Packaging");  
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing");  
 
-Task("Default-CLI-Publishing")
-    .IsDependentOn("Default-CLI-Packaging");
+var defaultCLIPublishing = Task("Default-CLI-Publishing")
+    .IsDependentOn("Action-CLI-Zip-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing");
 
 // CI related targets
 var taskDefaultCI = Task("Default-CI")
     .IsDependentOn("Default-Run-UnitTests")
     .IsDependentOn("Action-API-NuGet-Packaging")
+
     .IsDependentOn("Action-CLI-Zip-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    
     // always 'push'
-    // the action checks if the current branch has to be published (dev always, the rest goes via 'ci.nuget.shouldpublish')
+    // the action checks if the current branch has to be published 
+    // (dev always, the rest goes via 'ci.nuget.shouldpublish' / 'ci.chocolatey.shouldpublish')
     .IsDependentOn("Action-API-NuGet-Publishing")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing")
 	
 	// always create a new release - either in draft or published as per 'ci.github.shouldpublish' variable
 	.IsDependentOn("Action-GitHub-ReleaseNotes")
 
 	.IsDependentOn("Action-Docs-Merge");
+    
