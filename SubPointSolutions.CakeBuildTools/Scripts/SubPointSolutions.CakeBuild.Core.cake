@@ -14,12 +14,12 @@
 #reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta8");
 
 Setup(ctx => {
 	Information(Figlet("SubPointSolutions'"));
     Information(Figlet("CakeBuildTools"));
-	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta8");
 });
 
 // variables

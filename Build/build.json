@@ -51,9 +51,29 @@
             ]
         }
     ],
-    "customChocolateySpecs": [
-        
-    ],
+  "customChocolateySpecs": [
+    {
+      "Id": "SubPointSolutions.CakeBuildTools",
+      "Version": "0.1.0-beta8",
+      "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
+      "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
+      "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
+      "Description": "Provides common build tasks for all SubPoint Solution projects.",
+      "Copyright": "Copyright 2016",
+      "Tags": [
+       
+      ],
+      "Files": [
+        {
+          "Source": "lib/net45",
+          "SolutionRelativeSourceFilesFolder": "SubPointSolutions.CakeBuildTools/bin/debug",
+          "SourceFiles": [
+            "SubPointSolutions.CakeBuildTools.dll"
+          ]
+        }
+      ]
+    }
+  ],
     "defaultTestAssemblyPaths": [
        
     ],
