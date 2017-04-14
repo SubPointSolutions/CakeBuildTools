@@ -53,7 +53,7 @@
     ],
   "customChocolateySpecs": [
     {
-      "Id": "SubPointSolutions.CakeBuildTools",
+      "Id": "SubPointSolutions.CakeBuildToolsChocolatey",
       "Version": "0.1.0-beta8",
       "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
       "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
@@ -61,7 +61,7 @@
       "Description": "Provides common build tasks for all SubPoint Solution projects.",
       "Copyright": "Copyright 2016",
       "Tags": [
-       
+
       ],
       "Files": [
         {
