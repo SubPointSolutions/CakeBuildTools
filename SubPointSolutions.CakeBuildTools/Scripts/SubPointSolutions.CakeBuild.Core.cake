@@ -1197,6 +1197,9 @@ var defaultActionCLIZipPackaging = Task("Action-CLI-Zip-Packaging")
            
            var originalFileBase = System.IO.Path.GetDirectoryName(files.FirstOrDefault(f => f.Contains(".exe")));
 
+           if(string.IsNullOrEmpty(originalFileBase))
+                originalFileBase = System.IO.Path.GetDirectoryName(files.FirstOrDefault(f => f.Contains(".dll")));
+
            Verbose(String.Format("- base folder:[{0}]",originalFileBase));
            foreach(var f in files)
            Verbose(String.Format(" - file:[{0}]", f));
