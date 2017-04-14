@@ -1147,7 +1147,7 @@ var defaultActionCLIChocolateyPublishing = Task("Action-CLI-Chocolatey-Publishin
                     {
                         Information(string.Format("Publishing Chocolatey NuGet package [{0}]...", packageFileName));
                     
-                        ChocolateyPush(packageFilePath, new NuGetPushSettings {
+                        ChocolateyPush(packageFilePath, new ChocolateyPushSettings {
                             Source = nugetSource,
                             ApiKey = nugetKey
                         });
