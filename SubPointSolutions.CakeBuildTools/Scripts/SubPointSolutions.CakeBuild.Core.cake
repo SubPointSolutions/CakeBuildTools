@@ -935,10 +935,83 @@ var defaultActionRestoreNuGetPackages = Task("Action-Restore-NuGet-Packages")
 var defaultActionBuild = Task("Action-Build")
     .Does(() =>
 {
-      MSBuild(defaultSolutionFilePath, settings => {
+
+	var customProjectBuildProfiles = jsonConfig["customProjectBuildProfiles"];
+
+	if(customProjectBuildProfiles == null || customProjectBuildProfiles.Count() == 0)
+    {
+        Verbose("No custom project profiles detected. Switching to normal *.sln build");
+        
+		MSBuild(defaultSolutionFilePath, settings => {
             settings.SetVerbosity(Verbosity.Quiet);
             settings.SetConfiguration(configuration);
-      });
+		});
+
+		return;
+    }
+
+    var currentBuildProfileIndex = 0;
+    var buildProfilesCount = customProjectBuildProfiles.Count();
+
+    foreach(var buildProfile in customProjectBuildProfiles) {
+
+        currentBuildProfileIndex++;
+        var profileName = (string)buildProfile["ProfileName"];
+
+        Information(string.Format("[{0}/{1}] Building project profile:[{2}]",
+            new object[] {
+                currentBuildProfileIndex,
+                buildProfilesCount,
+                profileName
+            }));
+
+        var projectFiles = buildProfile["ProjectFiles"].Select(p => (string)p);
+        var buildParameters = buildProfile["BuildParameters"].Select(p => (string)p);
+
+        var currentProjectFileIndex = 0;
+        var projecFilesCount = projectFiles.Count();
+
+        foreach(var projectFile in projectFiles)
+        {
+            currentProjectFileIndex++;
+            var fullProjectFilePath = ResolveFullPathFromSolutionRelativePath(projectFile);
+
+            Information(string.Format(" [{0}/{1}] Building project file:[{2}]",
+                new object[] {
+                    currentProjectFileIndex,
+                    projecFilesCount,
+                    projectFile
+            }));
+
+            Verbose(string.Format(" - file path:[{0}]", fullProjectFilePath)); 
+            
+            var buildSettings =  new MSBuildSettings{
+
+            };
+
+            var buildParametersString = String.Empty;
+            var solutionDirectoryParam = "/p:SolutionDir=" + defaultSolutionDirectory;
+
+            buildParametersString += " " + solutionDirectoryParam;
+            buildParametersString += " " + String.Join(" ", buildParameters);
+
+            buildSettings.ArgumentCustomization = args => {
+                
+                foreach(var arg in buildParameters) {
+                    args.Append(arg);
+                }
+
+                args.Append(solutionDirectoryParam);
+                return args;
+            };
+
+            Verbose(string.Format(" - params:[{0}]", buildParametersString)); 
+            MSBuild(fullProjectFilePath, buildSettings);
+        }
+    }        
+
+
+     
 });
 
 // runs unit tests for the giving projects and categories
@@ -1099,7 +1172,16 @@ var defaultActionCLIChocolateyPublishing = Task("Action-CLI-Chocolatey-Publishin
     .Does(() =>
 {
         Information(String.Format("CLI Chocolatey publishing enabled? branch:[{0}]", ciBranch));
+
+		var nuGetPackages = System.IO.Directory.GetFiles(defaultChocolateyPackagesDirectory, "*.nupkg");
         var shouldPublish = ShouldPublishChocolatey(ciBranch);
+
+		Information(String.Format("shouldPublish?:[{0}]", shouldPublish));
+
+		if(nuGetPackages.Count() == 0) {
+			Information(String.Format("Can't find any choco packages. Returning...."));
+			return;
+		}
 
         var nugetSource = String.Empty;
         var nugetKey = String.Empty;
@@ -1130,7 +1212,7 @@ var defaultActionCLIChocolateyPublishing = Task("Action-CLI-Chocolatey-Publishin
             nugetSource
         });
 
-        var nuGetPackages = System.IO.Directory.GetFiles(defaultChocolateyPackagesDirectory, "*.nupkg");
+        
 
         foreach(var packageFilePath in nuGetPackages)
             {
