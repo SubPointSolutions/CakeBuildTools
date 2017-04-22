@@ -4,6 +4,7 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet&Version=0.4.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy&Version=0.2.1
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
@@ -839,6 +840,18 @@ NuSpecDependency[] ResolveDependenciesForPackage(string id) {
     return result.ToArray();
 }
 
+string GetSafeConfigValue(string name, string defaultValue) {
+
+    var value = jsonConfig[name];
+
+    if(value == null)
+        return defaultValue;
+
+    return (string)value;
+}
+
+
+
 // CI related environment
 // * dev / beta / master versioning and publishing
 var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
@@ -856,7 +869,7 @@ var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
 
 var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
 var ciChocolateyShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.chocolatey.shouldpublish") ?? "FALSE");
-
+var ciWebDeployShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.webdeploy.shouldpublish") ?? "FALSE");
 var ciGitHubShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.github.shouldpublish") ?? "FALSE");
 
 // source solution dir and file
@@ -873,6 +886,14 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
 
+// web deploy settings
+//var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
+var defaultWebDeployPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployPackageDir", "./build-artifact-webdeploy"));
+var defaultWebDeployTmpPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployTmpPackageDir", "./build-artifact-webdeploy-tmp"));
+
+System.IO.Directory.CreateDirectory(defaultWebDeployPackageDir);
+System.IO.Directory.CreateDirectory(defaultWebDeployTmpPackageDir);
+
 // test settings
 var defaultTestCategories = jsonConfig["defaultTestCategories"].Select(t => (string)t).ToList();
 var defaultTestAssemblyPaths = jsonConfig["defaultTestAssemblyPaths"].Select(t => GetFullPath(defaultSolutionDirectory + "/" + (string)t)).ToList();
@@ -888,6 +909,10 @@ defaultBuildDirs.AddRange(GetAllProjectDirectories(defaultSolutionDirectory));
 // default dirs for chocol and nuget packages
 defaultBuildDirs.Add(ResolveFullPathFromSolutionRelativePath(defaultChocolateyPackagesDirectory));
 defaultBuildDirs.Add(ResolveFullPathFromSolutionRelativePath(defaultNuGetPackagesDirectory));
+
+// add web deploy dirs to clean folder
+defaultBuildDirs.Add(defaultWebDeployPackageDir);
+defaultBuildDirs.Add(defaultWebDeployTmpPackageDir);
 
 Information("Starting build...");
 Information(string.Format(" -target:[{0}]",target));
@@ -1068,6 +1093,16 @@ bool ShouldPublishAPINuGet(string branch) {
 		return true;
 
 	return ciNuGetShouldPublish;
+}
+
+bool ShouldPublishWebDeploy(string branch) {
+
+    // always publish dev branch
+    // the rest comes from 'ciWebDeployShouldPublish' -> 'ci.webdeploy.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciWebDeployShouldPublish;
 }
 
 bool ShouldPublishChocolatey(string branch) {
@@ -1619,6 +1654,128 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
     );
 });
 
+
+var defaultActionWebAppPackage = Task("Action-WebApp-Packaging")
+    .Does(() =>
+{
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+    {
+        Information("defaultWebDeploySettings section in JSON file is null. Skipping step...");
+        return;
+    }
+
+    var webDeploySettings = jsonConfig["defaultWebDeploySettings"];
+
+	Information(string.Format("Building web deploy packages [{1}] in folder:[{0}]",
+             defaultWebDeployPackageDir,
+             webDeploySettings.Count())); 
+
+    foreach(var webDeploySetting in webDeploySettings)
+    {
+        var csProjectFilePath = ResolveFullPathFromSolutionRelativePath((string)webDeploySetting["SolutionRelativeProjectFilePath"]);
+        var csProjectFileName = System.IO.Path.GetFileNameWithoutExtension(csProjectFilePath);
+
+        var siteFolderName = csProjectFileName;
+
+        Information(string.Format("Building web deploy package for file path:[{0}]",
+                csProjectFilePath));
+
+        if(!System.IO.File.Exists(csProjectFilePath))
+            throw new Exception(string.Format("Cannot find project file:[{0}]", csProjectFilePath));
+
+        var siteDirectoryPath = System.IO.Path.Combine(defaultWebDeployPackageDir, siteFolderName);
+        System.IO.Directory.CreateDirectory(siteDirectoryPath);
+
+        Information(String.Format("Cleaning directory:[{0}]", siteDirectoryPath));
+        System.IO.Directory.Delete(siteDirectoryPath, true);
+        System.IO.Directory.CreateDirectory(siteDirectoryPath);
+
+        Information(String.Format("Creating web deploy package in directory:[{0}]", siteDirectoryPath));
+        MSBuild(csProjectFilePath, settings =>
+            settings
+            .SetConfiguration(configuration)
+            .SetVerbosity(Verbosity.Minimal)
+            .UseToolVersion(MSBuildToolVersion.VS2015)
+            .WithTarget("WebPublish")
+            .WithProperty("Verbosity", "Silent")
+            .WithProperty("VisualStudioVersion", new string[]{"14.0"})
+            .WithProperty("WebPublishMethod", new string[]{ "FileSystem" })
+            .WithProperty("PublishUrl", new string[]{ siteDirectoryPath })
+            );
+    }   
+});
+
+var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
+    .Does(() =>
+{
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+    {
+        Information("defaultWebDeploySettings section in JSON file is null. Skipping step...");
+        return;
+    }
+
+    var shouldPublish = ShouldPublishAPINuGet(ciBranch);
+
+    if(!shouldPublish)
+    {
+        Information(string.Format("Skipping web deploy publishing, shouldPublish = false"));
+        return;
+    }
+
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+        throw new Exception("defaultWebDeploySettings section in JSON file is null");
+
+    var webDeploySettings = jsonConfig["defaultWebDeploySettings"];
+
+	Information(string.Format("Building web deploy packages [{1}] in folder:[{0}]",
+             defaultWebDeployPackageDir,
+             webDeploySettings.Count())); 
+
+    foreach(var webDeploySetting in webDeploySettings)
+    {
+        var csProjectFilePath = ResolveFullPathFromSolutionRelativePath((string)webDeploySetting["SolutionRelativeProjectFilePath"]);
+        var csProjectFileName = System.IO.Path.GetFileNameWithoutExtension(csProjectFilePath);
+        
+        var siteFolderName = csProjectFileName;
+        var siteDirectoryPath = System.IO.Path.Combine(defaultWebDeployPackageDir, siteFolderName);
+
+        var webDeploySiteName = String.Empty;
+        var webDeploySiteUserPassword = String.Empty;
+
+        {
+            Information("Fetching creds.");
+
+            var siteNamedVariableName = String.Format("ci.webdeploy.{0}-{1}.sitename", csProjectFileName, ciBranch);
+            var sitePasswordVariableName = String.Format("ci.webdeploy.{0}-{1}.sitepassword", csProjectFileName, ciBranch);
+
+            var siteNameValue = GetGlobalEnvironmentVariable(siteNamedVariableName);
+            var sitePasswordValue = GetGlobalEnvironmentVariable(sitePasswordVariableName);
+
+            if(String.IsNullOrEmpty(siteNameValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", siteNamedVariableName));
+
+            if(String.IsNullOrEmpty(sitePasswordValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", sitePasswordVariableName));
+
+            webDeploySiteName = siteNameValue;
+            webDeploySiteUserPassword = sitePasswordValue;
+        }
+
+        Information(string.Format("Publishing web site [{0}] from folder:[{1}]",
+            webDeploySiteName,
+            webDeploySiteUserPassword));	
+        
+        DeployWebsite(new DeploySettings()
+        {
+                SourcePath = siteDirectoryPath,
+                SiteName = webDeploySiteName,
+                ComputerName = "https://" + webDeploySiteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + webDeploySiteName,
+                Username = "$" + webDeploySiteName,
+                Password = webDeploySiteUserPassword
+        });
+    }        
+});
+
 // Action-XXX - common tasks
 // * Action-Validate-Environment
 // * Action-Clean
@@ -1637,6 +1794,9 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
 
 // * Action-GitHub-ReleaseNotes
 
+// * Action-WebApp-Packaging
+// * Action-WebApp-Publishing
+
 // basic common targets
 // expose them as global vars by naming conventions
 // later, a particular build script can 'attach' additional tasks
@@ -1651,7 +1811,8 @@ var taskDefaultClean = Task("Default-Clean")
 var taskDefaultBuild = Task("Default-Build")
     .IsDependentOn("Default-Clean")
 	.IsDependentOn("Action-Restore-NuGet-Packages")
-    .IsDependentOn("Action-Build");
+    .IsDependentOn("Action-Build")
+    .IsDependentOn("Action-WebApp-Packaging");
 
 var taskDefaultRunUnitTests = Task("Default-Run-UnitTests")
     .IsDependentOn("Default-Build")
@@ -1681,6 +1842,9 @@ var defaultCLIPublishing = Task("Default-CLI-Publishing")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Publishing");
 
+var defaultWebAppPublishing = Task("Default-WebApp-Publishing")
+    .IsDependentOn("Action-WebApp-Publishing");
+
 // CI related targets
 var taskDefaultCI = Task("Default-CI")
     .IsDependentOn("Default-Run-UnitTests")
@@ -1688,12 +1852,13 @@ var taskDefaultCI = Task("Default-CI")
 
     .IsDependentOn("Action-CLI-Zip-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
-    
+
     // always 'push'
     // the action checks if the current branch has to be published 
     // (dev always, the rest goes via 'ci.nuget.shouldpublish' / 'ci.chocolatey.shouldpublish')
     .IsDependentOn("Action-API-NuGet-Publishing")
     .IsDependentOn("Action-CLI-Chocolatey-Publishing")
+    .IsDependentOn("Action-WebApp-Publishing")
 	
 	// always create a new release - either in draft or published as per 'ci.github.shouldpublish' variable
 	.IsDependentOn("Action-GitHub-ReleaseNotes")
