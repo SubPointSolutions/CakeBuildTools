@@ -1763,7 +1763,7 @@ var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
 
         Information(string.Format("Publishing web site [{0}] from folder:[{1}]",
             webDeploySiteName,
-            webDeploySiteUserPassword));	
+            siteDirectoryPath));	
         
         DeployWebsite(new DeploySettings()
         {
