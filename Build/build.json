@@ -45,6 +45,7 @@
                     "Target": "scripts",
                     "TargetFiles": [
                         "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake",
+                        "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.Docs.cake",
                         "bin/debug/scripts/build-template.json"
                     ]
                 }
