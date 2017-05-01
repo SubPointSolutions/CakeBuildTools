@@ -11,8 +11,6 @@
 var defaultActionDocsGenerateSampleIndex = Task("Action-Docs-Generate-SampleIndex")
     .Does(() =>
 {
-			
-
             var rootPath = System.IO.Path.GetFullPath("../SubPointSolutions.Docs");
             var srcViewFolderPath = System.IO.Path.Combine(rootPath, "Views");
 

@@ -48,6 +48,15 @@
                         "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.Docs.cake",
                         "bin/debug/scripts/build-template.json"
                     ]
+                },
+                {
+                      "Target": "content",
+                      "TargetFiles": [
+                        "build.cake",
+                        "build.json",
+                        "build.ps1",
+                        "tools/**"
+                      ]
                 }
             ]
         }
