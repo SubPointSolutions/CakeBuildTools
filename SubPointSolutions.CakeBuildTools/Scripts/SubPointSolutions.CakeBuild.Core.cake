@@ -864,6 +864,14 @@ if(!String.IsNullOrEmpty(ciBranchOverride))
 	ciBranch = ciBranchOverride;
 }
 
+// VS?
+ciBranchOverride = GetGlobalEnvironmentVariable("BUILD_SOURCEBRANCHNAME");
+if(!String.IsNullOrEmpty(ciBranchOverride))
+{
+    Information(String.Format("Detected VS Online build. Reverting to BUILD_SOURCEBRANCHNAME varibale:[{0}]", ciBranchOverride));
+	ciBranch = ciBranchOverride;
+}
+
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
 

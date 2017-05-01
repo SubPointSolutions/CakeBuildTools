@@ -11,19 +11,31 @@
 var defaultActionDocsGenerateSampleIndex = Task("Action-Docs-Generate-SampleIndex")
     .Does(() =>
 {
-            var rootPath = System.IO.Path.GetFullPath("../SubPointSolutions.Docs");
-            var srcViewFolderPath = System.IO.Path.Combine(rootPath, "Views");
+	var rootPath = System.IO.Path.GetFullPath("../SubPointSolutions.Docs");
+    var srcViewFolderPath = System.IO.Path.Combine(rootPath, "Views");
 
-			Information(String.Format("Generating samples index in root folder:[{0}]", srcViewFolderPath));
+	Information(String.Format("Generating samples index in root folder:[{0}]", srcViewFolderPath));
 
-            var srcSubmodulesPaths =  System.IO.Directory.GetDirectories(srcViewFolderPath);
+    var srcSubmodulesPaths =  System.IO.Directory.GetDirectories(srcViewFolderPath);
+	
+	foreach (var srcFolderPath in srcSubmodulesPaths)
+    {
+		Information(String.Format("    Processing subfolder:[{0}]", srcFolderPath));
+        SubPointSolutions.DocsBuildTools.SampleWriteAPI.CreateSamplesIndex(srcFolderPath);
 
-            foreach (var srcFolderPath in srcSubmodulesPaths)
-            {
-				Information(String.Format("    Processing subfolder:[{0}]", srcFolderPath));
-                SubPointSolutions.DocsBuildTools.SampleWriteAPI.CreateSamplesIndex(srcFolderPath);
+		var allSamples = SubPointSolutions.DocsBuildTools.Data.SampleReadAPI.LoadSamples(srcFolderPath);
+		Information(String.Format("        Generated [{0}] sample index files", allSamples.Count()));
+    }
+});
 
-				var allSamples = SubPointSolutions.DocsBuildTools.Data.SampleReadAPI.LoadSamples(srcFolderPath);
-				Information(String.Format("        Generated [{0}] sample index files", allSamples.Count()));
-            }
+var defaultActionDocsGenerateSampleIndex = Task("Action-Docs-Generate-WebSite")
+    .Does(() =>
+{
+	
+});
+
+var defaultActionDocsGenerateSampleIndex = Task("Action-Docs-Publish-Netlify")
+    .Does(() =>
+{
+	
 });
