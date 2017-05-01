@@ -24,10 +24,7 @@
             "Id": "SubPointSolutions.CakeBuildTools",
             "Version": "0.1.0-beta10",
             "Dependencies": [
-                {
-                    "Id": "SubPointSolutions.DocsBuildTools",
-                    "Version": "SubPointSolutions.DocsBuildTools",
-                }
+                
             ],
             "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
             "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",

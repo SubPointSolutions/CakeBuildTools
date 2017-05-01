@@ -1869,4 +1869,10 @@ var taskDefaultCI = Task("Default-CI")
 	.IsDependentOn("Action-GitHub-ReleaseNotes")
 
 	.IsDependentOn("Action-Docs-Merge");
-    
+
+var taskDefaultCILocal = Task("Default-CI-Local")
+    .IsDependentOn("Default-Run-UnitTests")
+    .IsDependentOn("Action-API-NuGet-Packaging")
+
+    .IsDependentOn("Action-CLI-Zip-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging");
