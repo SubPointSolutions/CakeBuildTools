@@ -1570,6 +1570,11 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
     .Does(() => {
 
+	if(jsonConfig["defaultGitGubReleaseNotesEnabled"] == null || ((bool)jsonConfig["defaultGitGubReleaseNotesEnabled"]) == false) {
+		 Information(String.Format("defaultGitGubReleaseNotesEnabled is null. Skipping GitHub releases..."));
+ 		 return;
+	}
+
     Information("Building GitHub release notes...");
 
     string githubCompanyName = GetGlobalEnvironmentVariable("ci.github.companyname");

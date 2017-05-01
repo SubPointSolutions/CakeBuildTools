@@ -8,29 +8,34 @@
     "defaultDocsBuildEnabled": false,
     "defaultDocsViewFolder": "",
     "defaultDocsSamplesFolder": "",
-    "defaultDocsRepoFolder" : "",
-    "defaultDocsBranch" : "",
-    "defaultDocsFileExtensions" : [
+    "defaultDocsRepoFolder": "",
+    "defaultDocsBranch": "",
+    "defaultDocsFileExtensions": [
         "*.md",
         "*.cs",
         "*.cshtml"
     ],
-    
+
     "defaultTestCategories": [
         "CI.Core"
     ],
     "customNuspecs": [
-       {
+        {
             "Id": "SubPointSolutions.CakeBuildTools",
             "Version": "0.1.0-beta10",
-            "Dependencies": [ ],
+            "Dependencies": [
+                {
+                    "Id": "SubPointSolutions.DocsBuildTools",
+                    "Version": "SubPointSolutions.DocsBuildTools",
+                }
+            ],
             "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
             "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
             "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
             "Description": "Provides common build tasks for all SubPoint Solution projects.",
             "Copyright": "Copyright 2016",
             "Tags": [
-                
+
             ],
 
             "Files": [
@@ -50,13 +55,13 @@
                     ]
                 },
                 {
-                      "Target": "content",
-                      "TargetFiles": [
+                    "Target": "content",
+                    "TargetFiles": [
                         "build.cake",
                         "build.json",
                         "build.ps1",
                         "tools/**"
-                      ]
+                    ]
                 }
             ]
         }
@@ -90,3 +95,4 @@
     "defaultBuildDirs": [ ],
     "defaultEnvironmentVariables": [ ]
 }
+
