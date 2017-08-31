@@ -46,15 +46,21 @@
     <None Include="Scripts\build-template.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Scripts\SubPointSolutions.CakeBuild.Core.Docs.cake">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Scripts\SubPointSolutions.CakeBuild.Core.cake">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Templates\build.cake" />
-    <None Include="Templates\build.json" />
-    <None Include="Templates\build.ps1" />
-    <None Include="Templates\tools\nuget.config" />
-    <None Include="Templates\tools\packages.config" />
-    <None Include="Templates\tools\packages.config.md5sum" />
+    <None Include="build.cake" />
+    <None Include="build.json" />
+    <None Include="build.ps1" />
+    <None Include="tools\nuget.config" />
+    <None Include="tools\packages.config" />
+    <None Include="tools\packages.config.md5sum" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Templates\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

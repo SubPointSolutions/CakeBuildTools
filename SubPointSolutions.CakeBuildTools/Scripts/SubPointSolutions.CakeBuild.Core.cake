@@ -4,9 +4,12 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet&Version=0.4.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy&Version=0.2.1
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
+
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http&Version=2.2.29
 
 #reference "tools/Octokit/lib/net45/Octokit.dll"
 #reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.dll"
@@ -14,12 +17,12 @@
 #reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
 
 Setup(ctx => {
 	Information(Figlet("SubPointSolutions'"));
-    Information(Figlet("CakeBuildTools"));
-	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta7");
+    	Information(Figlet("CakeBuildTools"));
+	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
 });
 
 // variables
@@ -839,6 +842,18 @@ NuSpecDependency[] ResolveDependenciesForPackage(string id) {
     return result.ToArray();
 }
 
+string GetSafeConfigValue(string name, string defaultValue) {
+
+    var value = jsonConfig[name];
+
+    if(value == null)
+        return defaultValue;
+
+    return (string)value;
+}
+
+
+
 // CI related environment
 // * dev / beta / master versioning and publishing
 var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
@@ -851,10 +866,20 @@ if(!String.IsNullOrEmpty(ciBranchOverride))
 	ciBranch = ciBranchOverride;
 }
 
+// VS?
+ciBranchOverride = GetGlobalEnvironmentVariable("BUILD_SOURCEBRANCHNAME");
+if(!String.IsNullOrEmpty(ciBranchOverride))
+{
+    Information(String.Format("Detected VS Online build. Reverting to BUILD_SOURCEBRANCHNAME varibale:[{0}]", ciBranchOverride));
+	ciBranch = ciBranchOverride;
+}
+
 var ciNuGetSource = GetGlobalEnvironmentVariable("ci.nuget.source") ?? String.Empty;
 var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
-var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
 
+var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
+var ciChocolateyShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.chocolatey.shouldpublish") ?? "FALSE");
+var ciWebDeployShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.webdeploy.shouldpublish") ?? "FALSE");
 var ciGitHubShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.github.shouldpublish") ?? "FALSE");
 
 // source solution dir and file
@@ -871,6 +896,14 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
 
+// web deploy settings
+//var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
+var defaultWebDeployPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployPackageDir", "./build-artifact-webdeploy"));
+var defaultWebDeployTmpPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployTmpPackageDir", "./build-artifact-webdeploy-tmp"));
+
+System.IO.Directory.CreateDirectory(defaultWebDeployPackageDir);
+System.IO.Directory.CreateDirectory(defaultWebDeployTmpPackageDir);
+
 // test settings
 var defaultTestCategories = jsonConfig["defaultTestCategories"].Select(t => (string)t).ToList();
 var defaultTestAssemblyPaths = jsonConfig["defaultTestAssemblyPaths"].Select(t => GetFullPath(defaultSolutionDirectory + "/" + (string)t)).ToList();
@@ -886,6 +919,10 @@ defaultBuildDirs.AddRange(GetAllProjectDirectories(defaultSolutionDirectory));
 // default dirs for chocol and nuget packages
 defaultBuildDirs.Add(ResolveFullPathFromSolutionRelativePath(defaultChocolateyPackagesDirectory));
 defaultBuildDirs.Add(ResolveFullPathFromSolutionRelativePath(defaultNuGetPackagesDirectory));
+
+// add web deploy dirs to clean folder
+defaultBuildDirs.Add(defaultWebDeployPackageDir);
+defaultBuildDirs.Add(defaultWebDeployTmpPackageDir);
 
 Information("Starting build...");
 Information(string.Format(" -target:[{0}]",target));
@@ -933,10 +970,83 @@ var defaultActionRestoreNuGetPackages = Task("Action-Restore-NuGet-Packages")
 var defaultActionBuild = Task("Action-Build")
     .Does(() =>
 {
-      MSBuild(defaultSolutionFilePath, settings => {
+
+	var customProjectBuildProfiles = jsonConfig["customProjectBuildProfiles"];
+
+	if(customProjectBuildProfiles == null || customProjectBuildProfiles.Count() == 0)
+    {
+        Verbose("No custom project profiles detected. Switching to normal *.sln build");
+        
+		MSBuild(defaultSolutionFilePath, settings => {
             settings.SetVerbosity(Verbosity.Quiet);
             settings.SetConfiguration(configuration);
-      });
+		});
+
+		return;
+    }
+
+    var currentBuildProfileIndex = 0;
+    var buildProfilesCount = customProjectBuildProfiles.Count();
+
+    foreach(var buildProfile in customProjectBuildProfiles) {
+
+        currentBuildProfileIndex++;
+        var profileName = (string)buildProfile["ProfileName"];
+
+        Information(string.Format("[{0}/{1}] Building project profile:[{2}]",
+            new object[] {
+                currentBuildProfileIndex,
+                buildProfilesCount,
+                profileName
+            }));
+
+        var projectFiles = buildProfile["ProjectFiles"].Select(p => (string)p);
+        var buildParameters = buildProfile["BuildParameters"].Select(p => (string)p);
+
+        var currentProjectFileIndex = 0;
+        var projecFilesCount = projectFiles.Count();
+
+        foreach(var projectFile in projectFiles)
+        {
+            currentProjectFileIndex++;
+            var fullProjectFilePath = ResolveFullPathFromSolutionRelativePath(projectFile);
+
+            Information(string.Format(" [{0}/{1}] Building project file:[{2}]",
+                new object[] {
+                    currentProjectFileIndex,
+                    projecFilesCount,
+                    projectFile
+            }));
+
+            Verbose(string.Format(" - file path:[{0}]", fullProjectFilePath)); 
+            
+            var buildSettings =  new MSBuildSettings{
+
+            };
+
+            var buildParametersString = String.Empty;
+            var solutionDirectoryParam = "/p:SolutionDir=" + defaultSolutionDirectory;
+
+            buildParametersString += " " + solutionDirectoryParam;
+            buildParametersString += " " + String.Join(" ", buildParameters);
+
+            buildSettings.ArgumentCustomization = args => {
+                
+                foreach(var arg in buildParameters) {
+                    args.Append(arg);
+                }
+
+                args.Append(solutionDirectoryParam);
+                return args;
+            };
+
+            Verbose(string.Format(" - params:[{0}]", buildParametersString)); 
+            MSBuild(fullProjectFilePath, buildSettings);
+        }
+    }        
+
+
+     
 });
 
 // runs unit tests for the giving projects and categories
@@ -993,6 +1103,26 @@ bool ShouldPublishAPINuGet(string branch) {
 		return true;
 
 	return ciNuGetShouldPublish;
+}
+
+bool ShouldPublishWebDeploy(string branch) {
+
+    // always publish dev branch
+    // the rest comes from 'ciWebDeployShouldPublish' -> 'ci.webdeploy.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciWebDeployShouldPublish;
+}
+
+bool ShouldPublishChocolatey(string branch) {
+   
+    // always publish dev branch
+    // the rest comes from 'ciChocolateyShouldPublish' -> 'ci.chocolatey.shouldpublish' environment variable
+	if(branch == "dev")
+		return true;
+
+	return ciChocolateyShouldPublish;
 }
 
 var defaultActionAPINuGetPublishing = Task("Action-API-NuGet-Publishing")
@@ -1081,6 +1211,86 @@ var defaultActionCLIChocolateyPackaging = Task("Action-CLI-Chocolatey-Packaging"
       Information(string.Format("Completed creating chocolatey package"));
 });
 
+
+
+var defaultActionCLIChocolateyPublishing = Task("Action-CLI-Chocolatey-Publishing")
+    .Does(() =>
+{
+        Information(String.Format("CLI Chocolatey publishing enabled? branch:[{0}]", ciBranch));
+
+		var nuGetPackages = System.IO.Directory.GetFiles(defaultChocolateyPackagesDirectory, "*.nupkg");
+        var shouldPublish = ShouldPublishChocolatey(ciBranch);
+
+		Information(String.Format("shouldPublish?:[{0}]", shouldPublish));
+
+		if(nuGetPackages.Count() == 0) {
+			Information(String.Format("Can't find any choco packages. Returning...."));
+			return;
+		}
+
+        var nugetSource = String.Empty;
+        var nugetKey = String.Empty;
+
+        if(!shouldPublish) {
+            Information("Skipping Chocolatey publishing.");
+            return;
+        } else {
+            Information("Fetching Chocolatey NuGet feed creds.");
+
+            var feedSourceVariableName = String.Format("ci.chocolatey.{0}-source", ciBranch);
+            var feedKeyVariableName = String.Format("ci.chocolatey.{0}-key", ciBranch);
+
+            var feedSourceValue = GetGlobalEnvironmentVariable(feedSourceVariableName);
+            var feedKeyValue = GetGlobalEnvironmentVariable(feedKeyVariableName);
+
+            if(String.IsNullOrEmpty(feedSourceValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedSourceVariableName));
+
+            if(String.IsNullOrEmpty(feedKeyValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", feedKeyVariableName));
+
+            nugetSource = feedSourceValue;
+            nugetKey = feedKeyValue;
+        }
+
+        Information("Publishing Chocolatey packages to repository: [{0}]", new []{
+            nugetSource
+        });
+
+        
+
+        foreach(var packageFilePath in nuGetPackages)
+            {
+                var packageFileName = System.IO.Path.GetFileName(packageFilePath);
+
+                if(System.IO.File.Exists(packageFilePath)) {
+                    
+                    // checking is publushed
+                    Information(string.Format("Checking if Chocolatey NuGet package [{0}] is already published", packageFileName));
+                    
+                    // TODO
+                    var isNuGetPackagePublished = false;
+                    if(!isNuGetPackagePublished)
+                    {
+                        Information(string.Format("Publishing Chocolatey NuGet package [{0}]...", packageFileName));
+                    
+                        ChocolateyPush(packageFilePath, new ChocolateyPushSettings {
+                            Source = nugetSource,
+                            ApiKey = nugetKey
+                        });
+                    }
+                    else
+                    {
+                        Information(string.Format("Chocolatey NuGet package [{0}] was already published", packageFileName));
+                    }                 
+                    
+                } else {
+                    Information(string.Format("Chocolatey NuGet package does not exist:[{0}]", packageFilePath));
+                    throw new ArgumentException(string.Format("Chocolatey NuGet package does not exist:[{0}]", packageFilePath));
+                }
+            }           
+});
+
 var defaultActionCLIZipPackaging = Task("Action-CLI-Zip-Packaging")
     .Does(() =>
 {
@@ -1113,6 +1323,9 @@ var defaultActionCLIZipPackaging = Task("Action-CLI-Zip-Packaging")
            }
            
            var originalFileBase = System.IO.Path.GetDirectoryName(files.FirstOrDefault(f => f.Contains(".exe")));
+
+           if(string.IsNullOrEmpty(originalFileBase))
+                originalFileBase = System.IO.Path.GetDirectoryName(files.FirstOrDefault(f => f.Contains(".dll")));
 
            Verbose(String.Format("- base folder:[{0}]",originalFileBase));
            foreach(var f in files)
@@ -1273,7 +1486,8 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
         var cloneCmd = new []{
             string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
+            //string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
+			string.Format("git clone -b {1} {0} --quiet", docsRepoUrl, defaultDocsBranch)
         };
 
         StartPowershellScript(string.Join(Environment.NewLine, cloneCmd));  
@@ -1366,6 +1580,11 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
     .Does(() => {
 
+	if(jsonConfig["defaultGitGubReleaseNotesEnabled"] == null || ((bool)jsonConfig["defaultGitGubReleaseNotesEnabled"]) == false) {
+		 Information(String.Format("defaultGitGubReleaseNotesEnabled is null. Skipping GitHub releases..."));
+ 		 return;
+	}
+
     Information("Building GitHub release notes...");
 
     string githubCompanyName = GetGlobalEnvironmentVariable("ci.github.companyname");
@@ -1450,6 +1669,128 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
     );
 });
 
+
+var defaultActionWebAppPackage = Task("Action-WebApp-Packaging")
+    .Does(() =>
+{
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+    {
+        Information("defaultWebDeploySettings section in JSON file is null. Skipping step...");
+        return;
+    }
+
+    var webDeploySettings = jsonConfig["defaultWebDeploySettings"];
+
+	Information(string.Format("Building web deploy packages [{1}] in folder:[{0}]",
+             defaultWebDeployPackageDir,
+             webDeploySettings.Count())); 
+
+    foreach(var webDeploySetting in webDeploySettings)
+    {
+        var csProjectFilePath = ResolveFullPathFromSolutionRelativePath((string)webDeploySetting["SolutionRelativeProjectFilePath"]);
+        var csProjectFileName = System.IO.Path.GetFileNameWithoutExtension(csProjectFilePath);
+
+        var siteFolderName = csProjectFileName;
+
+        Information(string.Format("Building web deploy package for file path:[{0}]",
+                csProjectFilePath));
+
+        if(!System.IO.File.Exists(csProjectFilePath))
+            throw new Exception(string.Format("Cannot find project file:[{0}]", csProjectFilePath));
+
+        var siteDirectoryPath = System.IO.Path.Combine(defaultWebDeployPackageDir, siteFolderName);
+        System.IO.Directory.CreateDirectory(siteDirectoryPath);
+
+        Information(String.Format("Cleaning directory:[{0}]", siteDirectoryPath));
+        System.IO.Directory.Delete(siteDirectoryPath, true);
+        System.IO.Directory.CreateDirectory(siteDirectoryPath);
+
+        Information(String.Format("Creating web deploy package in directory:[{0}]", siteDirectoryPath));
+        MSBuild(csProjectFilePath, settings =>
+            settings
+            .SetConfiguration(configuration)
+            .SetVerbosity(Verbosity.Minimal)
+            .UseToolVersion(MSBuildToolVersion.VS2015)
+            .WithTarget("WebPublish")
+            .WithProperty("Verbosity", "Silent")
+            .WithProperty("VisualStudioVersion", new string[]{"14.0"})
+            .WithProperty("WebPublishMethod", new string[]{ "FileSystem" })
+            .WithProperty("PublishUrl", new string[]{ siteDirectoryPath })
+            );
+    }   
+});
+
+var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
+    .Does(() =>
+{
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+    {
+        Information("defaultWebDeploySettings section in JSON file is null. Skipping step...");
+        return;
+    }
+
+    var shouldPublish = ShouldPublishAPINuGet(ciBranch);
+
+    if(!shouldPublish)
+    {
+        Information(string.Format("Skipping web deploy publishing, shouldPublish = false"));
+        return;
+    }
+
+    if(jsonConfig["defaultWebDeploySettings"] == null)
+        throw new Exception("defaultWebDeploySettings section in JSON file is null");
+
+    var webDeploySettings = jsonConfig["defaultWebDeploySettings"];
+
+	Information(string.Format("Building web deploy packages [{1}] in folder:[{0}]",
+             defaultWebDeployPackageDir,
+             webDeploySettings.Count())); 
+
+    foreach(var webDeploySetting in webDeploySettings)
+    {
+        var csProjectFilePath = ResolveFullPathFromSolutionRelativePath((string)webDeploySetting["SolutionRelativeProjectFilePath"]);
+        var csProjectFileName = System.IO.Path.GetFileNameWithoutExtension(csProjectFilePath);
+        
+        var siteFolderName = csProjectFileName;
+        var siteDirectoryPath = System.IO.Path.Combine(defaultWebDeployPackageDir, siteFolderName);
+
+        var webDeploySiteName = String.Empty;
+        var webDeploySiteUserPassword = String.Empty;
+
+        {
+            Information("Fetching creds.");
+
+            var siteNamedVariableName = String.Format("ci.webdeploy.{0}-{1}.sitename", csProjectFileName, ciBranch);
+            var sitePasswordVariableName = String.Format("ci.webdeploy.{0}-{1}.sitepassword", csProjectFileName, ciBranch);
+
+            var siteNameValue = GetGlobalEnvironmentVariable(siteNamedVariableName);
+            var sitePasswordValue = GetGlobalEnvironmentVariable(sitePasswordVariableName);
+
+            if(String.IsNullOrEmpty(siteNameValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", siteNamedVariableName));
+
+            if(String.IsNullOrEmpty(sitePasswordValue)) 
+                throw new Exception(String.Format("environment variable is null or empty:[{0}]", sitePasswordVariableName));
+
+            webDeploySiteName = siteNameValue;
+            webDeploySiteUserPassword = sitePasswordValue;
+        }
+
+        Information(string.Format("Publishing web site [{0}] from folder:[{1}]",
+            webDeploySiteName,
+            siteDirectoryPath));	
+        
+        DeployWebsite(new DeploySettings()
+        {
+                SourcePath = siteDirectoryPath,
+                SiteName = webDeploySiteName,
+                ComputerName = "https://" + webDeploySiteName + ".scm.azurewebsites.net:443/msdeploy.axd?site=" + webDeploySiteName,
+                Username = "$" + webDeploySiteName,
+                Password = webDeploySiteUserPassword
+        });
+    }        
+});
+
 // Action-XXX - common tasks
 // * Action-Validate-Environment
 // * Action-Clean
@@ -1468,6 +1809,9 @@ var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
 
 // * Action-GitHub-ReleaseNotes
 
+// * Action-WebApp-Packaging
+// * Action-WebApp-Publishing
+
 // basic common targets
 // expose them as global vars by naming conventions
 // later, a particular build script can 'attach' additional tasks
@@ -1482,7 +1826,8 @@ var taskDefaultClean = Task("Default-Clean")
 var taskDefaultBuild = Task("Default-Build")
     .IsDependentOn("Default-Clean")
 	.IsDependentOn("Action-Restore-NuGet-Packages")
-    .IsDependentOn("Action-Build");
+    .IsDependentOn("Action-Build")
+    .IsDependentOn("Action-WebApp-Packaging");
 
 var taskDefaultRunUnitTests = Task("Default-Run-UnitTests")
     .IsDependentOn("Default-Build")
@@ -1504,22 +1849,40 @@ var taskDefaultCLIPackaging = Task("Default-CLI-Packaging")
     .IsDependentOn("Action-API-NuGet-Packaging")
 
     .IsDependentOn("Action-CLI-Zip-Packaging")
-    .IsDependentOn("Action-CLI-Chocolatey-Packaging");  
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing");  
 
-Task("Default-CLI-Publishing")
-    .IsDependentOn("Default-CLI-Packaging");
+var defaultCLIPublishing = Task("Default-CLI-Publishing")
+    .IsDependentOn("Action-CLI-Zip-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing");
+
+var defaultWebAppPublishing = Task("Default-WebApp-Publishing")
+    .IsDependentOn("Action-WebApp-Publishing");
 
 // CI related targets
 var taskDefaultCI = Task("Default-CI")
     .IsDependentOn("Default-Run-UnitTests")
     .IsDependentOn("Action-API-NuGet-Packaging")
+
     .IsDependentOn("Action-CLI-Zip-Packaging")
     .IsDependentOn("Action-CLI-Chocolatey-Packaging")
+
     // always 'push'
-    // the action checks if the current branch has to be published (dev always, the rest goes via 'ci.nuget.shouldpublish')
+    // the action checks if the current branch has to be published 
+    // (dev always, the rest goes via 'ci.nuget.shouldpublish' / 'ci.chocolatey.shouldpublish')
     .IsDependentOn("Action-API-NuGet-Publishing")
+    .IsDependentOn("Action-CLI-Chocolatey-Publishing")
+    .IsDependentOn("Action-WebApp-Publishing")
 	
 	// always create a new release - either in draft or published as per 'ci.github.shouldpublish' variable
 	.IsDependentOn("Action-GitHub-ReleaseNotes")
 
 	.IsDependentOn("Action-Docs-Merge");
+
+var taskDefaultCILocal = Task("Default-CI-Local")
+    .IsDependentOn("Default-Run-UnitTests")
+    .IsDependentOn("Action-API-NuGet-Packaging")
+
+    .IsDependentOn("Action-CLI-Zip-Packaging")
+    .IsDependentOn("Action-CLI-Chocolatey-Packaging");
