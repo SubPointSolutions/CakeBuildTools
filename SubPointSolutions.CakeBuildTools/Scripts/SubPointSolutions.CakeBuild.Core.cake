@@ -9,18 +9,20 @@
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
 
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http&Version=2.2.29
+
 #reference "tools/Octokit/lib/net45/Octokit.dll"
 #reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.dll"
 #reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.WebRequest.dll"
 #reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta8");
+Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
 
 Setup(ctx => {
 	Information(Figlet("SubPointSolutions'"));
-    Information(Figlet("CakeBuildTools"));
-	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta8");
+    	Information(Figlet("CakeBuildTools"));
+	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
 });
 
 // variables
