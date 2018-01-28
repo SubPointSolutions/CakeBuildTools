@@ -1,28 +1,29 @@
 // common tooling
 // always version to avoid breaking change with new releases
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.2.9
-#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
-#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet&Version=0.4.0
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy&Version=0.2.1
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell
+#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json
+#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
 
-#tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.24.0
-#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.8.2
+#tool nuget:https://www.nuget.org/api/v2/?package=Octokit
+#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
 
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http&Version=2.2.29
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http
 
-#reference "tools/Octokit/lib/net45/Octokit.dll"
-#reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.dll"
-#reference "tools/Microsoft.Net.Http/lib/net40/System.Net.Http.WebRequest.dll"
-#reference "tools/Microsoft.AspNet.Razor/lib/net45/System.Web.Razor.dll"
-#reference "tools/RazorEngine/lib/net40/RazorEngine.dll"
+#reference "tools/Octokit.0.28.0/lib/net45/Octokit.dll"
+#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
+#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.WebRequest.dll"
+#reference "tools/RazorEngine.3.10.0/lib/net40/RazorEngine.dll"
 
-Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
+var version = "0.1.0-beta10";
+
+Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
 Setup(ctx => {
 	Information(Figlet("SubPointSolutions'"));
     	Information(Figlet("CakeBuildTools"));
-	Information("Running SubPointSolutions.CakeBuildTools: 0.1.0-beta9");
+	Information("Running SubPointSolutions.CakeBuildTools: " + version);
 });
 
 // variables
