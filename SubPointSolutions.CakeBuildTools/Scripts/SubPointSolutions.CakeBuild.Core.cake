@@ -16,7 +16,7 @@
 #reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.WebRequest.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net40/RazorEngine.dll"
 
-var version = "0.1.0-beta10";
+var version = "0.1.0-beta11";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
