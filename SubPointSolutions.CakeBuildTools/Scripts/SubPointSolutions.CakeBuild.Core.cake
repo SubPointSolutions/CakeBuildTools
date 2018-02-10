@@ -5,13 +5,14 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Wyam
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
-
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http
+#tool nuget:https://www.nuget.org/api/v2/?package=Wyam
 
 #reference "tools/Octokit.0.28.0/lib/net45/Octokit.dll"
 #reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
@@ -20,7 +21,7 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.0-beta12";
+var version = "0.1.0-beta13";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -900,6 +901,16 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 // chocolatey
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
+
+// wyam 
+var defaultWyamInputDir = GetSafeConfigValue("defaultWyamInputDir", "input");
+var defaultWyamOutputDir = GetFullPath(GetSafeConfigValue("defaultWyamOutputDir", "./build-artifact-wyam"));
+
+var defaultWyamRecipe = GetSafeConfigValue("defaultWyamRecipe", "Blog");
+var defaultWyamTheme = GetSafeConfigValue("defaultWyamTheme", "CleanBlog");
+var defaultWyamPreviewPort = System.Int32.Parse(GetSafeConfigValue("defaultWyamPreviewPort", "5080"));
+
+System.IO.Directory.CreateDirectory(defaultWyamOutputDir);
 
 // web deploy settings
 //var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
@@ -1794,6 +1805,78 @@ var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
                 Password = webDeploySiteUserPassword
         });
     }        
+});
+
+void BuildWyam(WyamSettings settings) {
+    BuildWyam(settings, defaultWyamPreviewPort, defaultWyamOutputDir);
+}
+
+void BuildWyam(WyamSettings settings, int port, String outputPath) {
+
+    if(String.IsNullOrEmpty(outputPath)) {
+        var tmpFolderPath = System.IO.Path.Combine( System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        outputPath = tmpFolderPath;
+    }
+
+    System.IO.Directory.CreateDirectory(outputPath);
+
+    settings.PreviewPort = port;
+    settings.OutputPath = outputPath;
+
+    Information(String.Format("Wyam output path: {0}", outputPath ));
+
+    Wyam(settings);   
+}
+
+// builds Wyam based project
+var defaultActionWyam = Task("Action-Wyam")
+    .Does(() =>
+{
+    var projectName =  "Wyam.Web";
+    var targetFolderPath =  System.IO.Path.Combine(defaultSolutionDirectory, projectName + "\\" + defaultWyamInputDir);
+
+    if(!System.IO.Directory.Exists(targetFolderPath)) {
+        throw new Exception(String.Format("Path does not exist: {0}", targetFolderPath));
+    }
+    
+    Information(String.Format("Building Wyam project: {0}", targetFolderPath));
+    //System.IO.Directory.SetCurrentDirectory(  System.IO.Path.Combine(defaultSolutionDirectory, projectName ));
+
+    BuildWyam(new WyamSettings
+    {
+        RootPath  =  System.IO.Path.Combine(defaultSolutionDirectory, projectName ),
+        InputPaths = new []{ new Cake.Core.IO.DirectoryPath(targetFolderPath) },
+        Preview = false,
+        Watch = false,
+        Recipe = defaultWyamRecipe,
+        Theme = defaultWyamTheme
+        //Verbose = true
+    });   
+});
+
+var defaultActionWyamPreview = Task("Action-WyamPreview")
+    .Does(() =>
+{
+    var projectName =  "Wyam.Web";
+    var targetFolderPath =  System.IO.Path.Combine(defaultSolutionDirectory, projectName + "\\" + defaultWyamInputDir);
+
+    if(!System.IO.Directory.Exists(targetFolderPath)) {
+        throw new Exception(String.Format("Path does not exist: {0}", targetFolderPath));
+    }
+
+    Information(String.Format("Building Wyam project: {0}", targetFolderPath));
+    //System.IO.Directory.SetCurrentDirectory(  System.IO.Path.Combine(defaultSolutionDirectory, projectName ));
+
+    BuildWyam(new WyamSettings
+    {
+        RootPath  =  System.IO.Path.Combine(defaultSolutionDirectory, projectName ),
+        InputPaths = new []{ new Cake.Core.IO.DirectoryPath(targetFolderPath) },
+        Preview = true,
+        Watch = true,
+        Recipe = defaultWyamRecipe,
+        Theme = defaultWyamTheme
+        //Verbose = true
+    });   
 });
 
 // Action-XXX - common tasks

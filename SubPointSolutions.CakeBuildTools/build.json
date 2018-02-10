@@ -7,7 +7,7 @@
     "defaultWebDeployPackageDir": "./build-artifact-webdeploy",
     "defaultWebDeployTmpPackageDir": "./build-artifact-webdeploy-tmp",
 
-    "defaultNuspecVersion": "0.1.0-beta12",
+    "defaultNuspecVersion": "0.1.0-beta13",
      
     "defaultTestCategories": [
         "CI.Core"
