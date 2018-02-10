@@ -45,6 +45,7 @@
     <None Include="build.cake" />
     <None Include="build.json" />
     <None Include="build.ps1" />
+    <None Include="github-release-notes.chtml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,0 +1,31 @@
+﻿## What's new in @Model.ReleaseTitle @Model.ReleaseVersion, @Model.ReleaseMonthAndYear
+
+@if(!System.String.IsNullOrEmpty(Model.AssemblyFileVersion)) 
+{
+<text>
+AssemblyFileVersion: @Model.AssemblyFileVersion
+</text>
+}
+
+@foreach(var releaseGroup in Model.ReleaseIssueGroups){
+
+var items = releaseGroup.Issues;
+var label = releaseGroup.Label;
+var labelTitle = releaseGroup.LabelTitle;
+
+if (items.Count > 0) 
+{
+<text>
+### @labelTitle
+@foreach (var item in items)
+{
+<text>* <a href='@item.Url'>#@item.Number</a>, @item.Title</text>
+}
+</text>
+}
+}
+
+### Feature requests, support and contributions
+This is an internal project of [SubPointSolutions](http://subpointsolutions.com), but you are welcome to use it as you wish. In case you have unexpected issues, feedback or keen to see new features, please open up a new issue directly at [GitHub issue tracker](https://github.com/SubPointSolutions/CakeBuildTools/issues).
+
+* [GitHub issue tracker](https://github.com/SubPointSolutions/CakeBuildTools/issues)
