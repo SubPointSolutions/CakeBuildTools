@@ -7,6 +7,8 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http
@@ -14,9 +16,11 @@
 #reference "tools/Octokit.0.28.0/lib/net45/Octokit.dll"
 #reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
 #reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.WebRequest.dll"
-#reference "tools/RazorEngine.3.10.0/lib/net40/RazorEngine.dll"
 
-var version = "0.1.0-beta11";
+#reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
+#reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
+
+var version = "0.1.0-beta12";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
