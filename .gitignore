@@ -156,3 +156,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 packages
+.vs
+/SubPointSolutions.CakeBuildTools/packages.config
+/SubPointSolutions.CakeBuildTools/app.config

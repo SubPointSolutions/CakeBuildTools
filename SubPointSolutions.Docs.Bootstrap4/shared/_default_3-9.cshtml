@@ -2,68 +2,6 @@
     Layout = "_master.cshtml";
 }
 
-@functions {
-
-    public static string LoadExample() {
-        var path = @"C:\Users\anton\github\new-doco\Wyam.Web\input\spmeta2\reference\_samples\Models-SettingUpSiteModels.smpindx";
-        var result = Convert(path);
-
-        return  result.Value;
-
-    }
-
-    public static dynamic Convert(String filePath)
-    {
-        var doc = System.Xml.Linq.XDocument.Parse(System.IO.File.ReadAllText(filePath));
-        return Convert(doc.Root);
-    }
-
-    public static dynamic Convert(System.Xml.Linq.XElement parent)
-    {
-        dynamic output = new System.Dynamic.ExpandoObject();
-
-        output.Name = parent.Name.LocalName;
-        output.Value = parent.Value;
-
-        output.HasAttributes = parent.HasAttributes;
-        if (parent.HasAttributes)
-        {
-            output.Attributes = new List<KeyValuePair<string, string>>();
-            foreach (var attr in parent.Attributes())
-            {
-                KeyValuePair<string, string> temp = new KeyValuePair<string, string>(attr.Name.LocalName, attr.Value);
-                output.Attributes.Add(temp);
-            }
-        }
-
-        output.HasElements = parent.HasElements;
-        if (parent.HasElements)
-        {
-            output.Elements = new List<dynamic>();
-            foreach (var element in parent.Elements())
-            {
-                dynamic temp = Convert(element);
-                output.Elements.Add(temp);
-            }
-        }
-
-        return output;
-    }
-
-}
-
-@{
-    var code = LoadExample();
-
-    <div>
-        <pre class="prettyprint">
-            <code language="csharp">
-                @code
-            </code>
-        </pre>
-    </div>
-}
-
 <div class="container">
     <div class="row body">
 
