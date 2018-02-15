@@ -1,0 +1,215 @@
+@functions
+{
+    public static IDocument FindIndexDocumentForRelativeFolder(IEnumerable<IDocument> documents, string relativeFolderPath) 
+    {
+        return FindDocumentByRelativePath(documents, relativeFolderPath + "/index.md");
+    }
+
+    public static List<IDocument> FindDocumentsForRelativeFolder(IEnumerable<IDocument> documents, string relativeFolderPath) 
+    {
+        return documents.Where(d => d.Get<String>("RelativeFileDir").ToUpper() == relativeFolderPath.ToUpper())
+                        .Where(d => !d.Get<String>("SourceFileName").StartsWith("_"))
+                        .OrderBy(d => d.Get<int>(WyamHelper.Attributes.Order, 0))
+                        .ToList();
+    }
+
+    public static List<IDocument> FindSiblingDocuments(IEnumerable<IDocument> documents, IDocument document) 
+    {
+        var relativePath = document.Get<String>("RelativeFileDir");
+        return FindDocumentsForRelativeFolder(documents, relativePath);
+    }
+
+    public static IDocument FindDocumentByRelativePath(IEnumerable<IDocument> documents, string relativePath) 
+    {
+        return documents.FirstOrDefault(d => d.Get<String>("RelativeFilePath").ToUpper() == relativePath.ToUpper());
+    }
+    
+    public static IDocument GetCurrentIndexDocument(IEnumerable<IDocument> documents, IDocument currentDocument) 
+    {
+        var relativePath = currentDocument.Get<String>("RelativeFileDir");
+        return FindIndexDocumentForRelativeFolder(documents, relativePath);
+    }
+
+    public static IDocument GetProjectHomeDocument(IEnumerable<IDocument> documents,IDocument currentDocument)  {
+        var relativePath = currentDocument.Get<String>("RelativeFileDir");
+        var rootFolder = relativePath.Split('/').First();
+
+        return FindIndexDocumentForRelativeFolder(documents, rootFolder);
+    }
+
+    public static IDocument GetParentIndexDocument(IEnumerable<IDocument> documents, IDocument currentDocument) 
+    {
+        return GetParentIndexDocument(documents, currentDocument, null);
+    }
+
+    public static IDocument GetParentIndexDocument(IEnumerable<IDocument> documents, IDocument currentDocument, Func<IDocument, bool> filter) 
+    {
+        if(currentDocument == null) {
+            return null;
+        }
+
+        IDocument indexDocument = null;
+
+        var relativePath = currentDocument.Get<String>("RelativeFileDir");
+        var relativePathParts = relativePath.Split('/');
+
+        var partsCount = relativePathParts.Count();
+
+        for(var i = 0; i < partsCount - 1; i++) {
+            var relativeFolderPath = String.Join("/", relativePathParts.Take(partsCount - i));
+
+            indexDocument = FindIndexDocumentForRelativeFolder(documents, relativeFolderPath);
+
+            if(indexDocument != null) {
+                if(filter != null) {
+                    if(filter(indexDocument)) {
+                        return indexDocument;
+                    }
+                } else {
+                    return indexDocument;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static List<String> GetLeftNavigationFolders(IEnumerable<IDocument> documents, IDocument currentDocument) 
+    {
+        var result = new List<String>();
+
+        var currentDocFolders = currentDocument.Get<IEnumerable<object>>("Nav.LeftNodeFolders", null);
+
+        if(currentDocFolders != null) {
+            
+            var indexFileRelativeDir = currentDocument.Get<String>("RelativeFileDir");
+
+            var includeCurrent = currentDocument.Get<Boolean>("Nav.LeftNodeIncludeCurrentFolder", false);
+
+            if(includeCurrent) {
+                result.Add(indexFileRelativeDir);
+            }
+
+            foreach(var folder in currentDocFolders) {
+                result.Add(indexFileRelativeDir + "/" + folder.ToString());
+            }
+            
+        } else {
+
+            var indexFile = GetLeftNodeParentIndexFile(documents, currentDocument);
+
+            if(indexFile != null) {
+                
+                var includeCurrent = indexFile.Get<Boolean>("Nav.LeftNodeIncludeCurrentFolder", false);
+
+                if(includeCurrent) {
+                    result.Add(indexFile.Get<String>("RelativeFileDir"));
+                }
+
+                var indexFileRelativeDir = indexFile.Get<String>("RelativeFileDir");
+                var folders = indexFile.Get<IEnumerable<object>>("Nav.LeftNodeFolders", null);
+
+                if(folders != null) {
+                    foreach(var folder in folders) {
+                        result.Add(indexFileRelativeDir + "/" + folder.ToString());
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static IDocument GetLeftNodeParentIndexFile(IEnumerable<IDocument> documents, IDocument currentDocument) {
+        return GetParentIndexDocument(documents, currentDocument, indexDoc => {
+            return indexDoc.Get<IEnumerable<object>>("Nav.LeftNodeFolders", null) != null;
+        });
+    }
+
+    public static List<IDocument> GetLeftNavIndexFiles(IEnumerable<IDocument> documents, IDocument currentDocument) {
+        
+        var result = new List<IDocument>();
+        var relativeFolderPaths = GetLeftNavigationFolders(documents, currentDocument);
+
+        foreach(var relativeFolderPath in relativeFolderPaths) {
+            result.Add(FindIndexDocumentForRelativeFolder(documents, relativeFolderPath));
+        }
+
+        if(!result.Any()) {
+           var relativeFolderPath = currentDocument.Get<String>("RelativeFileDir");
+           result.Add(FindIndexDocumentForRelativeFolder(documents, relativeFolderPath));
+        }
+
+        result = result.OrderBy(d => d.Get<int>(WyamHelper.Attributes.NavLeftNodeOrder,0))
+                       .ToList();
+
+        return result;
+    }    
+
+    public static bool IsNavLeftActiveDocument(IDocument currentDocument, IDocument document) {
+        return  currentDocument.Get<String>("RelativeFilePath").ToUpper() == 
+                document.Get<String>("RelativeFilePath").ToUpper();
+    }
+
+    public static String GetNavLeftActiveDocumentClass(IDocument currentDocument, IDocument document) {
+        var result = String.Empty;
+
+        if(IsNavLeftActiveDocument(currentDocument, document)) {
+            return "active";
+        }
+
+        return result;
+    }
+}
+
+@{
+    var navIndexFiles = GetLeftNavIndexFiles(Documents, Model);
+    var homeDocument  = GetProjectHomeDocument(Documents, Model);
+
+    var homeTitle =  "Home";
+    var homeUrl   =  WyamHelper.GetUrl(homeDocument);
+}
+
+@if(navIndexFiles.Any()) {
+
+    <div class="container">
+        <div class="">
+            @foreach(var navIndexFile in navIndexFiles) {
+                var title = navIndexFile.Get<String>(WyamHelper.Attributes.Title); 
+                var leftNodeTitle = navIndexFile.Get<String>(WyamHelper.Attributes.NavLeftTitle, title); 
+
+                var siblingDocuments = FindSiblingDocuments(Documents, navIndexFile)
+                                        .OrderBy(d => d.Get<int>(WyamHelper.Attributes.NavLeftNodeOrder, 0))
+                                        .ToList();
+
+                @if(siblingDocuments.Any()) {
+                    <div class="d-left-nav-header">
+                        <span>
+                            @leftNodeTitle
+                        </span>
+                    </div>
+                    <div class="d-left-nav-list">
+                        <ul class="list-inline">
+                            @foreach(var siblingDocument in siblingDocuments) {
+                                var siblingTitle = siblingDocument.Get<String>("Title");
+                                var siblingUrl = WyamHelper.GetUrl(siblingDocument);
+                                var activeClass = GetNavLeftActiveDocumentClass(Model, siblingDocument);
+
+                                <li class="@activeClass">
+                                    <a class="@activeClass" href="@siblingUrl">
+                                        @siblingTitle
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    @if(navIndexFiles.Last() != navIndexFile){
+                        <hr/>
+                    }
+                }
+            }
+        </div>  
+    </div>
+}
+

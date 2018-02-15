@@ -1,0 +1,7 @@
+@{
+	if(@Metadata["RelativeFileDir"].ToString() == ".") {
+		Layout = "~/shared/_default_landing.cshtml";
+	}  else {
+		Layout = "~/shared/_default_3-9.cshtml";
+	}
+}
