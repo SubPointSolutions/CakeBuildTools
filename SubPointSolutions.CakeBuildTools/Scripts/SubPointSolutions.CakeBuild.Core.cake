@@ -1,8 +1,35 @@
 // common tooling
 // always version to avoid breaking change with new releases
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.2.9
-#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=9.0.1
-#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.12.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell
+#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json
+#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Wyam
+
+#tool nuget:https://www.nuget.org/api/v2/?package=Octokit
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc
+#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http
+#tool nuget:https://www.nuget.org/api/v2/?package=Wyam
+
+#reference "tools/Octokit.0.28.0/lib/net45/Octokit.dll"
+#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
+#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.WebRequest.dll"
+
+#reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
+#reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
+
+var version = "0.1.0-beta13";
+
+Information("Running SubPointSolutions.CakeBuildTools: " + version);
+
+Setup(ctx => {
+	Information(Figlet("SubPointSolutions'"));
+    	Information(Figlet("CakeBuildTools"));
+	Information("Running SubPointSolutions.CakeBuildTools: " + version);
+});
 
 // variables
 // * defaultXXX - shared, common settings from json config
@@ -371,9 +398,6 @@ string GetVersionForNuGetPackage(string id, string branch) {
 
 	if(branch != "master" && branch != "beta")
 		branch = "dev";
-	
-	branch = "master";
-
 
     var now = DateTime.Now;
 
@@ -834,6 +858,8 @@ string GetSafeConfigValue(string name, string defaultValue) {
     return (string)value;
 }
 
+
+
 // CI related environment
 // * dev / beta / master versioning and publishing
 var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
@@ -841,6 +867,8 @@ var ciBranch = GetGlobalEnvironmentVariable("ci.activebranch") ?? "local";
 // override under CI run
 var ciBranchOverride = GetGlobalEnvironmentVariable("APPVEYOR_REPO_BRANCH");
 if(!String.IsNullOrEmpty(ciBranchOverride))
+{
+    Information(String.Format("Detected APPVEYOR build. Reverting to APPVEYOR_REPO_BRANCH varibale:[{0}]", ciBranchOverride));
 	ciBranch = ciBranchOverride;
 }
 
@@ -873,6 +901,24 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 // chocolatey
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
+
+// wyam 
+var defaultWyamInputDir = GetSafeConfigValue("defaultWyamInputDir", "input");
+var defaultWyamOutputDir = GetFullPath(GetSafeConfigValue("defaultWyamOutputDir", "./build-artifact-wyam"));
+
+var defaultWyamRecipe = GetSafeConfigValue("defaultWyamRecipe", "Blog");
+var defaultWyamTheme = GetSafeConfigValue("defaultWyamTheme", "CleanBlog");
+var defaultWyamPreviewPort = System.Int32.Parse(GetSafeConfigValue("defaultWyamPreviewPort", "5080"));
+
+System.IO.Directory.CreateDirectory(defaultWyamOutputDir);
+
+// web deploy settings
+//var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
+var defaultWebDeployPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployPackageDir", "./build-artifact-webdeploy"));
+var defaultWebDeployTmpPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployTmpPackageDir", "./build-artifact-webdeploy-tmp"));
+
+System.IO.Directory.CreateDirectory(defaultWebDeployPackageDir);
+System.IO.Directory.CreateDirectory(defaultWebDeployTmpPackageDir);
 
 // test settings
 var defaultTestCategories = jsonConfig["defaultTestCategories"].Select(t => (string)t).ToList();
@@ -1802,6 +1848,31 @@ var defaultActionWyam = Task("Action-Wyam")
         InputPaths = new []{ new Cake.Core.IO.DirectoryPath(targetFolderPath) },
         Preview = false,
         Watch = false,
+        Recipe = defaultWyamRecipe,
+        Theme = defaultWyamTheme
+        //Verbose = true
+    });   
+});
+
+var defaultActionWyamPreview = Task("Action-WyamPreview")
+    .Does(() =>
+{
+    var projectName =  "Wyam.Web";
+    var targetFolderPath =  System.IO.Path.Combine(defaultSolutionDirectory, projectName + "\\" + defaultWyamInputDir);
+
+    if(!System.IO.Directory.Exists(targetFolderPath)) {
+        throw new Exception(String.Format("Path does not exist: {0}", targetFolderPath));
+    }
+
+    Information(String.Format("Building Wyam project: {0}", targetFolderPath));
+    //System.IO.Directory.SetCurrentDirectory(  System.IO.Path.Combine(defaultSolutionDirectory, projectName ));
+
+    BuildWyam(new WyamSettings
+    {
+        RootPath  =  System.IO.Path.Combine(defaultSolutionDirectory, projectName ),
+        InputPaths = new []{ new Cake.Core.IO.DirectoryPath(targetFolderPath) },
+        Preview = true,
+        Watch = true,
         Recipe = defaultWyamRecipe,
         Theme = defaultWyamTheme
         //Verbose = true

@@ -1,35 +1,3 @@
-<!-- @foreach(var tileGroup in WyamHelper.GetProjectCategories(Documents)) {
-
-    <div class="row">
-        <h4>
-            @tileGroup
-        </h4>
-    </div>
-
-    <div class="row">
-        @foreach(var project in WyamHelper.GetProjectsForCategory(Documents, tileGroup)) {
-            var projectTitle       = project.Get<String>(WyamHelper.Attributes.ProjectTitle);
-            var projectRelativeDir = project.Get<String>("RelativeFileDir");
-
-            <div class="md-4">
-                <h5>
-                    @projectTitle 
-                </h5>
-
-                <ul>
-                    @foreach(var projectLink in WyamHelper.GetProjectLinksForDir(Documents, projectRelativeDir)) {
-                        var url = WyamHelper.GetUrl(projectLink);
-                        <li>
-                            <a href="@url">
-                                @projectLink["Title"]
-                            </a>                                
-                        </li>
-                    }
-                </ul>
-            </div>
-        }
-    </div>
-} -->
 
 @foreach(var tileGroup in WyamHelper.GetProjectCategories(Documents)) {
 
@@ -69,7 +37,7 @@
                         
                             @if(firstLinks.Any()) {
                                 <div class='d-project-link-container'>
-                                    <table>
+                                    <table class="table">
                                         <tr>
                                             <td>
                                                 <ul>

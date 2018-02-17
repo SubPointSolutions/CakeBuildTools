@@ -5,12 +5,6 @@ h1 {
     color:red !important;
 }
 
-@import "bootstrap.css";
-
-table {
-    @extend .table;
-}
-
 pre {
     padding: 10px;   
 }
@@ -43,7 +37,7 @@ pre.prettyprint {
 
 .d-left-nav-list a {
     font-size:12px;
-    padding-left:10px;
+    padding-left:0px;
 }
 
 .d-left-nav-list a.active {
@@ -51,11 +45,11 @@ pre.prettyprint {
 }
 
 .d-left-nav-list li.active {
-    background-color: #eeeeee;
+    //background-color: #eeeeee;
 }
 
 .d-left-nav-list li:hover {
-    background-color: #eeeeee;
+    //background-color: #eeeeee;
 }
 
 .d-nav-second a.active {
@@ -63,7 +57,7 @@ pre.prettyprint {
 }
 
 .d-nav-second li.active {
-    background-color: #eeeeee;
+    //background-color: #eeeeee;
 }
 
 .col-lg-8 {
@@ -74,10 +68,19 @@ pre.prettyprint {
     border-left:1px solid rgba(0, 0, 0, 0.1);
 }
 
+.col-lg-10 {
+    border-left:1px solid rgba(0, 0, 0, 0.1);
+}
+
 .d-project-container {
     padding: 1rem;
-    padding-bottom: 0px;
-    
+    padding-top: 0px;
+    padding-bottom: 1rem;
+}
+
+.d-project-list-header{
+    padding-top: 0px;
+    padding-bottom: 1rem;
 }
 
 .d-project-card {
@@ -89,9 +92,6 @@ pre.prettyprint {
 }
 
 .d-project-category-container {
-    padding-left: $project-card-padding;
-    padding-right: $project-card-padding;
-    padding-top: $project-card-padding;
     font-size:   $project-card-font-size;
 }
 
@@ -111,7 +111,27 @@ pre.prettyprint {
  
 }
 
-
 .bg-primary {
-    background-color:red !important;
+   // background-color:brown !important;
+}
+
+.d-second-nav-container{
+    background-color: #ededed;
+}
+
+.d-col-centered {
+    float: none;
+    margin: 0 auto;
+}
+
+.d-footer-container {
+    background-color: #ededed;
+}
+
+.d-image {
+    width: 100%;
+}
+
+.blockquote {
+    font-size: 1rem;
 }

@@ -51,6 +51,7 @@
     <Content Include="js\tether.min.js" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".config\sps.docs.wyam" />
     <None Include="css\site.scss" />
     <None Include="index.md" />
     <None Include="resp\_ViewStart.cshtml" />

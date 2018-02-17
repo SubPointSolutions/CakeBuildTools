@@ -5,15 +5,15 @@
 <div class="container">
     <div class="row body">
        
-        <div class="col-12 p-3">
+        <div class="col-12 p-3 d-second-nav-container">
             @Html.Partial("partials/_nav_second")
         </div>        
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 p-3">
             @Html.Partial("partials/_nav_left")
         </div>
 
-        <div class="col-lg-8">
+        <div class="col-lg-8 p-3">
             @RenderBody()         
         </div>
     </div>
