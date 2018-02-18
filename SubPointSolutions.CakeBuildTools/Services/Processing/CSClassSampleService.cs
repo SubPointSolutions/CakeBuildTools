@@ -27,6 +27,8 @@ namespace SubPointSolutions.CakeBuildTools.Services.Processing
                                 .OfType<ClassDeclarationSyntax>()
                                 .ToList();
 
+            Console.WriteLine(String.Format("Found classes: {0}", csClasses.Count));
+
             foreach (var csClass in csClasses)
             {
                 var className = csClass.Identifier.ToString();
@@ -54,7 +56,12 @@ namespace SubPointSolutions.CakeBuildTools.Services.Processing
                     }
                 }
 
-                var namespaceName = (csClass.Parent as NamespaceDeclarationSyntax).Name.ToString();
+                var namespaceName = string.Empty;
+
+                if (csClass.Parent != null && csClass.Parent is NamespaceDeclarationSyntax)
+                {
+                    namespaceName = (csClass.Parent as NamespaceDeclarationSyntax).Name.ToString();
+                }
 
                 var sample = new DocSample();
 

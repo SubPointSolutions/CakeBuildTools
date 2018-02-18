@@ -30,10 +30,10 @@ namespace SubPointSolutions.CakeBuildTools.Tests.Impl
 
             var assemblyPath = Path.GetDirectoryName(GetType().Assembly.Location);
 
-            var path = @"C:\Users\anton\github\spmeta2\SPMeta2\SubPointSolutions.Docs";
+            var path = @"../../Data";
 
             var rootPath = System.IO.Path.GetFullPath(path);
-            var srcViewFolderPath = System.IO.Path.Combine(rootPath, "Views");
+            var srcViewFolderPath = rootPath;
 
             Information(String.Format("Generating samples index in root folder:[{0}]", srcViewFolderPath));
 

@@ -60,6 +60,11 @@ namespace SubPointSolutions.CakeBuildTools.Services.Processing
 
         protected virtual string NormilizeBody(string body, string startString)
         {
+            if (string.IsNullOrEmpty(body))
+            {
+                return string.Empty;
+            }
+
             var lines = body.Split(new string[] { Environment.NewLine, "\n", "\r\n" }, StringSplitOptions.None);
 
             string firstLine = null;

@@ -17,7 +17,7 @@ namespace SubPointSolutions.CakeBuildTools.Services.Indexes
         public virtual string GetSampleFileName(DocSample sample)
         {
             return string.Format("{0}-{1}.{2}",
-                sample.ClassName,
+                //sample.ClassName,
                 sample.MethodName,
                 "smp"
             );
@@ -69,6 +69,8 @@ namespace SubPointSolutions.CakeBuildTools.Services.Indexes
 
                 var sampleAsText = GetSampleAsString(sample);
 
+
+                Console.WriteLine("Saving file: " + sampleFilePath);
                 File.WriteAllText(sampleFilePath, sampleAsText, Encoding.UTF8);
             }
         }

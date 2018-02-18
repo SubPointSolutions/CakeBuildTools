@@ -14,8 +14,8 @@ namespace SubPointSolutions.CakeBuildTools.Services.Indexes
     {
         public override string GetSampleFileName(DocSample sample)
         {
-            return string.Format("{0}-{1}.{2}",
-                sample.ClassName,
+            return string.Format("{0}.{1}",
+               // sample.ClassName,
                 sample.MethodName,
                 "smpl-json"
             );

@@ -69,8 +69,12 @@ namespace SubPointSolutions.CakeBuildTools.Services.Processing
                                   .DescendantNodes()
                                   .OfType<MethodDeclarationSyntax>().ToList();
 
+                Console.WriteLine(String.Format("Found methods: {0}", csMethods.Count));
+
                 foreach (var csMethod in csMethods)
                 {
+                    Console.WriteLine(String.Format("Parsing method: {0}", csMethod));
+
                     var namespaceName = ((csMethod.Parent as ClassDeclarationSyntax).Parent as NamespaceDeclarationSyntax).Name.ToString();
 
                     var methodName = csMethod.Identifier.Text;
@@ -110,13 +114,15 @@ namespace SubPointSolutions.CakeBuildTools.Services.Processing
                         sample.MethodName = methodName + "_" + sample.MethodParametersCount + "_Params";
                     }
 
-                    sample.MethodBody = csMethod.Body
-                                                .ToString()
-                                                .TrimStart('{')
-                                                .TrimEnd('}');
-
-
-
+                    // abstract methods don't have any body
+                    if (csMethod.Body != null)
+                    {
+                        sample.MethodBody = csMethod.Body
+                            .ToString()
+                            .TrimStart('{')
+                            .TrimEnd('}');
+                    }
+                    
 
                     sample.SourceFileName = Path.GetFileName(filePath);
                     sample.SourceFileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
