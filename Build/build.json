@@ -16,6 +16,24 @@
         "*.cshtml"
     ],
 
+    "defaultWyamProjectName" : "Docs", 
+    "defaultWyamTheme"       : "SubPointSolutions.Docs.Bootstrap4",
+    "defaultWyamRecipe"      : "",
+    "defaultWyamPreviewPort" : "5070",
+    "defaultWyamConfigFile"  : "sps.docs.wyam",
+   
+    "defaultWyamNuGetPackages": [
+      {
+        "Id": "SubPointSolutions.Docs.Bootstrap4",
+        "Version": "",
+        "Source": [
+          "https://www.nuget.org/api/v2/",
+          "https://www.myget.org/F/subpointsolutions-staging/api/v2",
+          "https://ci.appveyor.com/nuget/subpointsolutions-cakebuildtools"
+        ]
+      }
+    ],
+
     "defaultTestCategories": [
         "CI.Core"
     ],

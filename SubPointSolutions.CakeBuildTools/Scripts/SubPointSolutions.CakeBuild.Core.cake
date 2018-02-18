@@ -21,7 +21,7 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.1-beta2";
+var version = "0.1.1-beta3";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -950,8 +950,7 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
 
-Information("1");
-
+Information("Loading wyam variables...");
 
 // wyam 
 var defaultWyamInputDir = GetSafeConfigValue("defaultWyamInputDir", "input");
@@ -966,10 +965,9 @@ var defaultWyamPreviewPort = System.Int32.Parse(GetSafeConfigValue("defaultWyamP
 
 var defaultWyamProjectName = GetSafeConfigValue("defaultWyamProjectName", "Wyam.Web");
 
-Information("6");
 System.IO.Directory.CreateDirectory(defaultWyamOutputDir);
 
-Information("2");
+Information("Loading web deploy variables...");
 
 // web deploy settings
 //var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
