@@ -1,0 +1,137 @@
+﻿$project-card-padding: 1rem;
+$project-card-font-size: 75%;
+
+h1 {
+    color:red !important;
+}
+
+pre {
+    padding: 10px;   
+}
+
+pre.prettyprint {
+    padding:15px;
+}
+
+#main-wrapper {
+    margin-top: 35px;
+}
+
+#main-wrapper > .container {
+    background-color: #fefefe;
+    border-left: 1px #dedede solid;
+    border-right: 1px #dedede solid;
+}
+
+#main-wrapper {
+    padding-top: 20px;
+}
+
+.d-nav-second{
+    text-align: left;
+}
+
+.d-left-nav-header > span {
+    font-weight:bold;
+}
+
+.d-left-nav-list a {
+    font-size:12px;
+    padding-left:0px;
+}
+
+.d-left-nav-list a.active {
+    font-weight:bold;
+}
+
+.d-left-nav-list li.active {
+    //background-color: #eeeeee;
+}
+
+.d-left-nav-list li:hover {
+    //background-color: #eeeeee;
+}
+
+.d-nav-second a.active {
+    font-weight:bold;
+}
+
+.d-nav-second li.active {
+    //background-color: #eeeeee;
+}
+
+.col-lg-8 {
+    border-left:1px solid rgba(0, 0, 0, 0.1);
+}
+
+.col-lg-9 {
+    border-left:1px solid rgba(0, 0, 0, 0.1);
+}
+
+.col-lg-10 {
+    border-left:1px solid rgba(0, 0, 0, 0.1);
+}
+
+.d-project-container {
+    padding: 1rem;
+    padding-top: 0px;
+    padding-bottom: 1rem;
+}
+
+.d-project-list-header{
+    padding-top: 0px;
+    padding-bottom: 1rem;
+}
+
+.d-project-card {
+    width: 100% !important;
+    padding:   $project-card-padding;
+    padding-bottom: 0px;
+    font-size: $project-card-font-size;
+    background-color: #fcfcfc;
+}
+
+.d-project-category-container {
+    font-size:   $project-card-font-size;
+}
+
+.d-project-link-container ul {
+    padding-left: 0px;
+    margin-left:  5px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+}
+
+.d-project-link-container table {
+    margin-bottom: 0px;
+}
+
+#header-wrapper .navbar {
+    
+ 
+}
+
+.bg-primary {
+   // background-color:brown !important;
+}
+
+.d-second-nav-container{
+    background-color: #ededed;
+}
+
+.d-col-centered {
+    float: none;
+    margin: 0 auto;
+}
+
+.d-footer-container {
+    background-color: #ededed;
+}
+
+.d-image {
+    width: 100%;
+}
+
+.blockquote {
+    font-size: 1rem;
+}
