@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CakeBuildTools", "CakeBuild
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wyam", "Wyam", "{ECE73670-AE76-49E5-BC45-C46BB7E2808F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Docs", "Docs\Docs.csproj", "{1630AAEB-C6E5-452A-8797-697602E6C32D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{89F184AE-6E1B-4C0C-AD4B-9F7B3B5E1F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89F184AE-6E1B-4C0C-AD4B-9F7B3B5E1F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89F184AE-6E1B-4C0C-AD4B-9F7B3B5E1F4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1630AAEB-C6E5-452A-8797-697602E6C32D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1630AAEB-C6E5-452A-8797-697602E6C32D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1630AAEB-C6E5-452A-8797-697602E6C32D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1630AAEB-C6E5-452A-8797-697602E6C32D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -21,7 +21,7 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.1-beta2";
+var version = "0.1.1-beta4";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -950,8 +950,7 @@ var defaultNuspecVersion = (string)jsonConfig["defaultNuspecVersion"];
 var defaultChocolateyPackagesDirectory = GetFullPath((string)jsonConfig["defaultChocolateyPackagesDirectory"]);
 System.IO.Directory.CreateDirectory(defaultChocolateyPackagesDirectory);
 
-Information("1");
-
+Information("Loading wyam variables...");
 
 // wyam 
 var defaultWyamInputDir = GetSafeConfigValue("defaultWyamInputDir", "input");
@@ -966,10 +965,9 @@ var defaultWyamPreviewPort = System.Int32.Parse(GetSafeConfigValue("defaultWyamP
 
 var defaultWyamProjectName = GetSafeConfigValue("defaultWyamProjectName", "Wyam.Web");
 
-Information("6");
 System.IO.Directory.CreateDirectory(defaultWyamOutputDir);
 
-Information("2");
+Information("Loading web deploy variables...");
 
 // web deploy settings
 //var defaultWebDeploySettings = jsonConfig["defaultWebDeploySettings"];
@@ -1574,7 +1572,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
         var docsRepoFolder = System.IO.Path.GetFullPath(string.Format(@"{0}/{1}", tmpDocsFolder, defaultDocsRepoFolder));
         var docsRepoUrl = defaultDocsRepoUrl;
 
-        var dstDocsPath        = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/Views", docsRepoFolder);
+        var dstDocsPath        = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/input", docsRepoFolder);
         var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
 
         var docsEnvironmentVars = new[] {
@@ -1629,7 +1627,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("cd '{0}'", docsRepoFolder),
             string.Format("git checkout {0} --quiet > null 2>&1", defaultDocsBranch),
             string.Format("git pull --quiet > null 2>&1")
-      };
+        };
 
         StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));
 
@@ -1687,7 +1685,9 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("git config http.sslVerify false"),
             string.Format("git config --global push.default simple"),
             string.Format("git push {0} --quiet > null 2>&1", docsRepoPushUrl),
-            string.Format("return $LASTEXITCODE")
+            //string.Format("if($LASTEXITCODE -ne 0) {"),
+            //string.Format("  throw \"Failed execution. Last exit code was: $LASTEXITCODE\""),
+            //string.Format("}")
         };
 
         // writing a temporary PS file to avoid creds exposure in the build output
@@ -1700,7 +1700,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             OutputToAppConsole = false
         });
 
-        Information(string.Format("Completed docs merge."));
+        Information(string.Format("Completed docs merge iwht result:{0}", res));
     });
 
 var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")

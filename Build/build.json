@@ -5,15 +5,31 @@
     "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
     "defaultNuspecVersion": "0.1.0",
 
-    "defaultDocsBuildEnabled": false,
-    "defaultDocsViewFolder": "",
+    "defaultDocsBuildEnabled": true,
+    "defaultDocsViewFolder": "docs/input",
     "defaultDocsSamplesFolder": "",
-    "defaultDocsRepoFolder": "",
-    "defaultDocsBranch": "",
+    "defaultDocsRepoFolder": "sps-cakebuildtools",
+    "defaultDocsBranch": "wyam-latest",
     "defaultDocsFileExtensions": [
-        "*.md",
-        "*.cs",
-        "*.cshtml"
+        "*.md"
+    ],
+
+    "defaultWyamProjectName" : "Docs", 
+    "defaultWyamTheme"       : "SubPointSolutions.Docs.Bootstrap4",
+    "defaultWyamRecipe"      : "",
+    "defaultWyamPreviewPort" : "5070",
+    "defaultWyamConfigFile"  : "sps.docs.wyam",
+   
+    "defaultWyamNuGetPackages": [
+      {
+        "Id": "SubPointSolutions.Docs.Bootstrap4",
+        "Version": "",
+        "Source": [
+          "https://www.nuget.org/api/v2/",
+          "https://www.myget.org/F/subpointsolutions-staging/api/v2",
+          "https://ci.appveyor.com/nuget/subpointsolutions-cakebuildtools"
+        ]
+      }
     ],
 
     "defaultTestCategories": [
@@ -22,7 +38,7 @@
     "customNuspecs": [
       {
         "Id": "SubPointSolutions.CakeBuildTools",
-        "Version": "0.1.1-beta2",
+        "Version": "0.1.1-beta4",
         "Dependencies": [ ],
         "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
         "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
@@ -52,7 +68,7 @@
 
       {
         "Id": "SubPointSolutions.Docs.Bootstrap4",
-        "Version": "0.1.101",
+        "Version": "0.2.1",
         "Dependencies": [ ],
         "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
         "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
