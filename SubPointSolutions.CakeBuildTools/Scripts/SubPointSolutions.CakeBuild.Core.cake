@@ -21,7 +21,7 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.1-beta7";
+var version = "0.1.1-beta8";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -2131,8 +2131,10 @@ string LookupWyamConfigFile()
 var defaultActionWyam = Task("Action-Wyam")
     .Does(() =>
     {
-        BuildWyam(GetDefaultWyamSettings(settings => {
+        var nugetPackages = GetWyamNuGetPackages();
 
+        BuildWyam(GetDefaultWyamSettings(settings => {
+            settings.NuGetPackages = nugetPackages;
         }));
     });
 
