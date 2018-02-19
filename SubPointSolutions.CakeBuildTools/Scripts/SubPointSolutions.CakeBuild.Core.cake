@@ -2193,6 +2193,35 @@ var defaultActionWyamVerifyConfig = Task("Action-WyamVerifyConfig")
         }));
     });
 
+var defaultNetlifyPublish = Task("Action-NetlifyPublish")
+    .Does(() =>
+    {
+        Information("Publishing netlify web site...");
+        var psSettings = new PowershellSettings()
+        {
+            LogOutput = false,
+            OutputToAppConsole = false
+        };
+
+        var netlifySiteId = GetGlobalEnvironmentVariable("ci.netlify.siteid-" + ciBranch);
+        var netlifyApiKey = GetGlobalEnvironmentVariable("ci.netlify.apikey-" + ciBranch);
+        var contentFolder = GetGlobalEnvironmentVariable("ci.netlify.content-folder-" + ciBranch);
+        
+        if (String.IsNullOrEmpty(netlifySiteId)) { throw new Exception("ci.netlify.siteid is null r emty for env: " + ciBranch); }
+        if (String.IsNullOrEmpty(netlifyApiKey)) { throw new Exception("ci.netlify.apikey is null r emty for env: " + ciBranch); }
+        if (String.IsNullOrEmpty(contentFolder)) { contentFolder = defaultWyamOutputDir; }
+        
+        var cmd = new [] {
+            "choco install -y nodejs",
+            "npm install netlify-cli -g --suppess-warnings --loglevel=error",
+            "netlify --version",
+            string.Format("netlify deploy -s {0} -t {1} -p {2}", netlifySiteId, netlifyApiKey, contentFolder)
+        };
+
+        StartPowershellScript(string.Join(Environment.NewLine, cmd), psSettings);
+    });
+
+
 // Action-XXX - common tasks
 // * Action-Validate-Environment
 // * Action-Clean

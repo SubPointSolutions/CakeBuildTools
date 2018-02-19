@@ -49,7 +49,7 @@ public static class WyamHelper
 	}
 
 	public static string GetThemeVersion() {
-		return "0.1.93";
+		return "0.2.2";
 	}
 
 	public static string GetThemeUrl() {
