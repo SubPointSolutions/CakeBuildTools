@@ -7,7 +7,7 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Wyam
 
-#tool nuget:https://www.nuget.org/api/v2/?package=Octokit
+#tool nuget:https://www.nuget.org/api/v2/?package=Octokit&version=0.28.0
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor
 #tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc
 #tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
