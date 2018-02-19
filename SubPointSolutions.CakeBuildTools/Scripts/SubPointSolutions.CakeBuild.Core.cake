@@ -1533,6 +1533,12 @@ var defaultDocsRepoUrl = @"https://github.com/SubPointSolutions/subpointsolution
 var defaultActionDocsMerge = Task("Action-Docs-Merge")
     .Does(() =>
     {
+        var psSettings = new PowershellSettings()
+        {
+            LogOutput = false,
+            OutputToAppConsole = false
+        };
+
         Information("Building documentation merge...");
 
         if (jsonConfig["defaultDocsBuildEnabled"] == null || ((bool)jsonConfig["defaultDocsBuildEnabled"]) == false)
@@ -1617,7 +1623,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 			string.Format("git clone -b {1} {0} --quiet", docsRepoUrl, defaultDocsBranch)
         };
 
-            StartPowershellScript(string.Join(Environment.NewLine, cloneCmd));
+            StartPowershellScript(string.Join(Environment.NewLine, cloneCmd), psSettings);
         }
 
         docsRepoFolder = docsRepoFolder + "/subpointsolutions-docs";
@@ -1629,7 +1635,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
             string.Format("git pull --quiet > null 2>&1")
         };
 
-        StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));
+        StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd), psSettings);
 
         // there must be *.sln file after check out
         // if not - then it means we failed to connect - check out
@@ -1644,7 +1650,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
             // again..
             Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
-            StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));
+            StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd), psSettings);
 
             hasSolutionFile = System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
 
@@ -1677,7 +1683,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
 
         mergeCmd.Add(string.Format("git commit -m '{0}' --quiet > null 2>&1", commitName));
 
-        StartPowershellScript(string.Join(Environment.NewLine, mergeCmd));
+        StartPowershellScript(string.Join(Environment.NewLine, mergeCmd), psSettings);
 
         Information(string.Format("Push to the main repo..."));
         var pushCmd = new[]{
@@ -1694,11 +1700,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
         var pushCmdFilePath = System.IO.Path.GetTempFileName() + ".ps1";
         System.IO.File.WriteAllLines(pushCmdFilePath, pushCmd);
 
-        var res = StartPowershellFile(pushCmdFilePath, new PowershellSettings()
-        {
-            LogOutput = false,
-            OutputToAppConsole = false
-        });
+        var res = StartPowershellFile(pushCmdFilePath, psSettings);
 
         Information(string.Format("Completed docs merge iwht result:{0}", res));
     });
