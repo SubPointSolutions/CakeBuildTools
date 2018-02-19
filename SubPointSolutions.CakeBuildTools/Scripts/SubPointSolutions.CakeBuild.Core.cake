@@ -21,7 +21,7 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.1-beta4";
+var version = "0.1.1-beta5";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -1578,7 +1578,7 @@ var defaultActionDocsMerge = Task("Action-Docs-Merge")
         var docsRepoFolder = System.IO.Path.GetFullPath(string.Format(@"{0}/{1}", tmpDocsFolder, defaultDocsRepoFolder));
         var docsRepoUrl = defaultDocsRepoUrl;
 
-        var dstDocsPath        = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/input", docsRepoFolder);
+        var dstDocsPath        = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
         var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
 
         var docsEnvironmentVars = new[] {
