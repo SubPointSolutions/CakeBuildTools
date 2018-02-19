@@ -17,7 +17,7 @@
     "defaultWyamProjectName" : "Docs", 
     "defaultWyamTheme"       : "SubPointSolutions.Docs.Bootstrap4",
     "defaultWyamRecipe"      : "",
-    "defaultWyamPreviewPort" : "5070",
+    "defaultWyamPreviewPort" : "5069",
     "defaultWyamConfigFile"  : "sps.docs.wyam",
    
     "defaultWyamNuGetPackages": [
@@ -38,7 +38,7 @@
     "customNuspecs": [
       {
         "Id": "SubPointSolutions.CakeBuildTools",
-        "Version": "0.1.1-beta5",
+        "Version": "0.1.1-beta6",
         "Dependencies": [ ],
         "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
         "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
@@ -68,7 +68,7 @@
 
       {
         "Id": "SubPointSolutions.Docs.Bootstrap4",
-        "Version": "0.2.1",
+        "Version": "0.2.2",
         "Dependencies": [ ],
         "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
         "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",

@@ -4,6 +4,8 @@
     var themeUrl = WyamHelper.GetThemeUrl();
 
     var themeTitle = String.Format("{0}, v{1}", themeName, themeVersion);
+
+     var lastUpdated = System.String.Format("{0:r}", System.DateTime.Now);
 }
 
 <!-- Footer -->
@@ -11,7 +13,7 @@
     <div class="container p-3">
         <div class="row">
             <div class="center-block d-col-centered">
-                Built with <a href="@themeUrl">@themeTitle</a>
+                Built with <a href="@themeUrl">@themeTitle</a>. Last updated: @lastUpdated
             </div>
         </div>
     </div>
