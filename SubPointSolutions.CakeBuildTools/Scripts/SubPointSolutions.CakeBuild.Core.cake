@@ -2250,10 +2250,10 @@ var defaultNetlifyPublish = Task("Action-NetlifyPublish")
 var taskDefault = Task("Default")
     .IsDependentOn("Default-Run-UnitTests");
 
-var taskDefault = Task("Default-Wyam")
+var taskDefaultWyam = Task("Default-Wyam")
     .IsDependentOn("Action-Wyam");
 
-var taskDefault = Task("Default-WyamPublish")
+var taskDefaultWyamPublish = Task("Default-WyamPublish")
     .IsDependentOn("Action-Wyam")
     .IsDependentOn("Action-NetlifyPublish");
 
