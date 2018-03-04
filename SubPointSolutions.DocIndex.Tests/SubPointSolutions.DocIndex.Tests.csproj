@@ -1,0 +1,697 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C7CE8111-C28A-4828-AC54-9F9905D8B97A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SubPointSolutions.DocIndex.Tests</RootNamespace>
+    <AssemblyName>SubPointSolutions.DocIndex.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <None Include="Data\metapack\getting-started\index.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidSPObjectNameStringComparison.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidUsingSPListItemFile.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotSuppressExceptions.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseEntityEditorEntities.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseSPContentTypeFieldsToAddOrDelete.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseSPContextObjectInDisposedBlock.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseUnsafeTypeConversionOnSPListItem.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\InappropriateUsageOfSPListCollection.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\OutOfContextRWEP.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\PutSPFileExistsIntoTryCatchBlock.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\SendMailFromWcfService.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\SPDataSourceScopeDoesNotDefined.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\SpecifySPZoneInSPSite.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\SPQueryScopeDoesNotDefined.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\SPViewScopeDoesNotDefined.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\UnsafeCastingInItemReceiver.cs" />
+    <None Include="Data\ReSP\Inspections\csharp\WrongSPViewUpdate.cs" />
+    <None Include="Data\spmeta2\extensibility\regression-testing.md" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-definition.md" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-syntax.md" />
+    <None Include="Data\spmeta2\getting-started\Basics.cs" />
+    <None Include="Data\spmeta2\getting-started\ConsoleAppSamples.cs" />
+    <None Include="Data\spmeta2\reference\Models.cs" />
+    <None Include="Data\spmeta2\reference\ProvisionServices.cs" />
+    <None Include="Data\spmeta2\reference\SiteModel.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AlternateUrlDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AppDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AppPrincipalDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AuditSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BooleanFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BreakRoleInheritanceDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BusinessDataFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\CalculatedFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ChoiceFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ClientWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ComputedFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentDatabaseDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentEditorWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeFieldLinkDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeLinkDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\CurrencyFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DateTimeFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DeleteWebPartsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DiagnosticsServiceBaseDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DocumentParserDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\EventReceiverDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FarmDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FarmSolutionDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FeatureDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FolderDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\GuidFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\HideContentTypeFieldLinksDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\HideContentTypeLinksDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\InformationRightsManagementSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\JobDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListFieldLinkDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListItemDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListItemFieldValueDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListViewDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListViewWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\LookupFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ManagedAccountDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MasterPageDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MasterPageSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ModuleFileDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MultiChoiceFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\NoteFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\NumberFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\PrefixDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\PropertyDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\QuickLaunchNavigationNodeDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RegionalSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RemoveContentTypeFieldLinksDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RemoveContentTypeLinksDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ResetRoleInheritanceDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RootWebDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SandboxSolutionDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ScriptEditorWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecureStoreApplicationDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityGroupDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityGroupLinkDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityRoleDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityRoleLinkDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SiteDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SP2013WorkflowDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SP2013WorkflowSubscriptionDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TargetApplicationDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TextFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TopNavigationNodeDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TreeViewSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UniqueContentTypeFieldsOrderDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UniqueContentTypeOrderDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\URLFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UserCustomActionDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UserFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebApplicationDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebConfigModificationDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebPartPageDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WelcomePageDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WikiPageDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\XsltListViewWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\_ContentTypeDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\_ContentTypes.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\_Fields.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\_WebParts.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\AudienceDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ContactFieldControlDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ContentByQueryWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ControlDisplayTemplateDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\CustomDocumentIdProviderDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\HTMLFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ImageFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ImageRenditionDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ItemDisplayTemplateDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\JavaScriptDisplayTemplateDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\LinkFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\MediaFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PageLayoutAndSiteTemplateSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PublishingPageDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PublishingPageLayoutDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchConfigurationDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchResultDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SiteFeedWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SummaryLinkFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SummaryLinkWebPartDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyFieldDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermGroupDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermLabelDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermSetDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermStoreDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\WebNavigationSettingsDefinition.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\_DisplayTemplates.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\_Fields.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\_Taxonomy.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\_WebParts.md" />
+    <None Include="Data\spmeta2\reference\Utils.cs" />
+    <None Include="Data\spmeta2\reference\WebModel.cs" />
+    <None Include="Data\spmeta2\extensibility\regression-testing.cs" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-definition.cs" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-logging.cs" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-syntax.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AlternateUrlDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AppDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AppPrincipalDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\AuditSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BooleanFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BreakRoleInheritanceDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\BusinessDataFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\CalculatedFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ChoiceFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ClientWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ComputedFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentDatabaseDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentEditorWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeFieldLinkDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ContentTypeLinkDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\CurrencyFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DateTimeFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DeleteWebPartsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DiagnosticsServiceBaseDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\DocumentParserDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\EventReceiverDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FarmDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FarmSolutionDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FeatureDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\FolderDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\GuidFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\HideContentTypeFieldLinksDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\HideContentTypeLinksDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\InformationRightsManagementSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\JobDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListFieldLinkDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListItemDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListItemFieldValueDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListViewDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ListViewWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\LookupFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ManagedAccountDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MasterPageDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MasterPageSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ModuleFileDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\MultiChoiceFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\NoteFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\NumberFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\PrefixDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\PropertyDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\QuickLaunchNavigationNodeDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RegionalSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RemoveContentTypeFieldLinksDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RemoveContentTypeLinksDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ResetRoleInheritanceDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\RootWebDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SandboxSolutionDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\ScriptEditorWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecureStoreApplicationDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityGroupDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityGroupLinkDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityRoleDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SecurityRoleLinkDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SiteDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SP2013WorkflowDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\SP2013WorkflowSubscriptionDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TargetApplicationDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TextFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TopNavigationNodeDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\TreeViewSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UniqueContentTypeFieldsOrderDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UniqueContentTypeOrderDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\URLFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UserCustomActionDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\UserFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebApplicationDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebConfigModificationDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WebPartPageDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WelcomePageDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\WikiPageDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\XsltListViewWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\AudienceDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ContactFieldControlDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ContentByQueryWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ControlDisplayTemplateDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\CustomDocumentIdProviderDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\HTMLFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ImageFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ImageRenditionDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\ItemDisplayTemplateDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\JavaScriptDisplayTemplateDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\LinkFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\MediaFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PageLayoutAndSiteTemplateSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PublishingPageDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\PublishingPageLayoutDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchConfigurationDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchResultDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SearchSettingsDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SiteFeedWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SummaryLinkFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\SummaryLinkWebPartDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyFieldDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermGroupDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermLabelDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermSetDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\TaxonomyTermStoreDefinitionTests.cs" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\WebNavigationSettingsDefinitionTests.cs" />
+    <Compile Include="Impl\DocIndexTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Data\metapack\getting-started\index.md" />
+    <None Include="Data\metapack\Index.md" />
+    <None Include="Data\metapack\reference\index.md" />
+    <None Include="Data\ReSP\code-completion\CommandUIDefinitionLocation.md" />
+    <None Include="Data\ReSP\code-completion\ContentPlaceHolderId.md" />
+    <None Include="Data\ReSP\code-completion\ContentTypeBindingContentTypeId.md" />
+    <None Include="Data\ReSP\code-completion\ContentTypeBindingListUrl.md" />
+    <None Include="Data\ReSP\code-completion\ContentTypeGroup.md" />
+    <None Include="Data\ReSP\code-completion\ControlSrc.md" />
+    <None Include="Data\ReSP\code-completion\CustomActionLocation.md" />
+    <None Include="Data\ReSP\code-completion\CustomActionRegistrationId.md" />
+    <None Include="Data\ReSP\code-completion\CustomActionRegistrationType.md" />
+    <None Include="Data\ReSP\code-completion\CustomActionRights.md" />
+    <None Include="Data\ReSP\code-completion\FeatureSiteTemplateAssociationFeatureId.md" />
+    <None Include="Data\ReSP\code-completion\FeatureSiteTemplateAssociationTemplateName.md" />
+    <None Include="Data\ReSP\code-completion\FieldGroup.md" />
+    <None Include="Data\ReSP\code-completion\FieldLookupList.md" />
+    <None Include="Data\ReSP\code-completion\FieldRef.md" />
+    <None Include="Data\ReSP\code-completion\FieldType.md" />
+    <None Include="Data\ReSP\code-completion\FileContentType.md" />
+    <None Include="Data\ReSP\code-completion\FilePublishingAssociatedContentType.md" />
+    <None Include="Data\ReSP\code-completion\FilePublishingPageLayout.md" />
+    <None Include="Data\ReSP\code-completion\Index.md" />
+    <None Include="Data\ReSP\code-completion\ListInstanceFeatureId.md" />
+    <None Include="Data\ReSP\code-completion\ListInstanceTemplateType.md" />
+    <None Include="Data\ReSP\code-completion\SPItemEventProperties.md" />
+    <None Include="Data\ReSP\code-completion\SPWebCollectionAdd.md" />
+    <None Include="Data\ReSP\code-completion\UseBuiltInFieldsInsteadOfStrings.md" />
+    <None Include="Data\ReSP\code-completion\UserProfilePropertyName.md" />
+    <None Include="Data\ReSP\code-completion\WebPartGroup.md" />
+    <None Include="Data\ReSP\code-completion\WebPartZoneTitle.md" />
+    <None Include="Data\ReSP\getting-started\FAQ.md" />
+    <None Include="Data\ReSP\getting-started\Index.md" />
+    <None Include="Data\ReSP\getting-started\License.md" />
+    <None Include="Data\ReSP\getting-started\Releases.md" />
+    <None Include="Data\ReSP\getting-started\_Basics.md" />
+    <None Include="Data\ReSP\getting-started\_Inspections.md" />
+    <None Include="Data\ReSP\getting-started\_Installing reSP.md" />
+    <None Include="Data\ReSP\getting-started\_Known issues.md" />
+    <None Include="Data\ReSP\getting-started\_Pro.md" />
+    <None Include="Data\ReSP\getting-started\_Support.md" />
+    <None Include="Data\ReSP\getting-started\_Updating reSP.md" />
+    <None Include="Data\ReSP\Index.md" />
+    <None Include="Data\ReSP\Inspections\aspnet\index.md" />
+    <None Include="Data\ReSP\Inspections\aspnet\SetAutoGenerateColumnsForSPGridViewInPage.md" />
+    <None Include="Data\ReSP\Inspections\aspnet\SPDataSourceScopeDoesNotDefinedInPage.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidDollarGlobalVariableInCode.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidEnumeratingAllUserProfiles.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidJQueryDocumentReadyInCode.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidSPObjectNameStringComparison.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidStaicSPObjectsInFields.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidUnsafeUrlConcatenations.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidUsingSPContextOutsideOfWebContext.md" />
+    <None Include="Data\ReSP\Inspections\csharp\AvoidUsingSPListItemFile.md" />
+    <None Include="Data\ReSP\Inspections\csharp\ConfigurationManagerShouldNotBeUsed.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotChangeSPPersistedObject.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotGetUtcTimeFromDateTime.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotSuppressExceptions.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseDirectorySearcher.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseEntityEditorEntities.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUsePortalLog.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseSPContentTypeFieldsToAddOrDelete.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseSPContextObjectInDisposedBlock.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseSPWebProperties.md" />
+    <None Include="Data\ReSP\Inspections\csharp\DoNotUseUnsafeTypeConversionOnSPListItem.md" />
+    <None Include="Data\ReSP\Inspections\csharp\GetPublishingPagesNoParams.md" />
+    <None Include="Data\ReSP\Inspections\csharp\InappropriateUsageOfSPListCollection.md" />
+    <None Include="Data\ReSP\Inspections\csharp\InappropriateUsageOfTaxonomyGroupCollection.md" />
+    <None Include="Data\ReSP\Inspections\csharp\index.md" />
+    <None Include="Data\ReSP\Inspections\csharp\MagicStringShouldNotBeUsed.md" />
+    <None Include="Data\ReSP\Inspections\csharp\NoCustomLogging.md" />
+    <None Include="Data\ReSP\Inspections\csharp\OutOfContextRWEP.md" />
+    <None Include="Data\ReSP\Inspections\csharp\OutOfContextSPWebPartManager.md" />
+    <None Include="Data\ReSP\Inspections\csharp\ProcessingIdParameterForAddWorkItemShouldBeEmpty.md" />
+    <None Include="Data\ReSP\Inspections\csharp\PutSPFileExistsIntoTryCatchBlock.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SendMailFromWcfService.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SPDataSourceScopeDoesNotDefined.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SpecifySPZoneInSPSite.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SPMonitoredScopeShouldBeUsed.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SPQueryScopeDoesNotDefined.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SPSiteFeatureShouldNotBeActivatedFromCode.md" />
+    <None Include="Data\ReSP\Inspections\csharp\SPViewScopeDoesNotDefined.md" />
+    <None Include="Data\ReSP\Inspections\csharp\ThreadSleepShouldNotBeUsed.md" />
+    <None Include="Data\ReSP\Inspections\csharp\ULSLoggingInCatchBlock.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UnsafeCastingInItemReceiver.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UseBuiltInFeatureInsteadOfStrings.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UseBuiltInFieldInsteadOfStrings.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UseBuiltInPublishingFieldInsteadOfStrings.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UseBuiltInUserProfilePropertyContantInsteadOfStrings.md" />
+    <None Include="Data\ReSP\Inspections\csharp\UseSecureStoreService.md" />
+    <None Include="Data\ReSP\Inspections\csharp\WrongSPViewUpdate.md" />
+    <None Include="Data\ReSP\Inspections\Index.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidDollarGlobalVariableInControl.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidDollarGlobalVariableInJSFile.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidDollarGlobalVariableInMasterPage.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidDollarGlobalVariableInPage.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidJQueryDocumentReadyInControl.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidJQueryDocumentReadyInJSFile.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidJQueryDocumentReadyInMasterPage.md" />
+    <None Include="Data\ReSP\Inspections\javascript\AvoidJQueryDocumentReadyInPage.md" />
+    <None Include="Data\ReSP\Inspections\javascript\index.md" />
+    <None Include="Data\ReSP\Inspections\xml\AvoidCommentsForContentType.md" />
+    <None Include="Data\ReSP\Inspections\xml\AvoidListContentTypes.md" />
+    <None Include="Data\ReSP\Inspections\xml\ConsiderHiddenListTemplates.md" />
+    <None Include="Data\ReSP\Inspections\xml\ConsiderOverwriteAttributeForContentType.md" />
+    <None Include="Data\ReSP\Inspections\xml\ConsiderOverwriteAttributeForField.md" />
+    <None Include="Data\ReSP\Inspections\xml\DeclareEmptyFieldsElement.md" />
+    <None Include="Data\ReSP\Inspections\xml\DeployContentTypesCorrectly.md" />
+    <None Include="Data\ReSP\Inspections\xml\DeployFieldsCorrectly.md" />
+    <None Include="Data\ReSP\Inspections\xml\DeployTaxonomyFieldsCorrectly.md" />
+    <None Include="Data\ReSP\Inspections\xml\DifferentInternalAndStaticFieldNames.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotAllowDeletionForField.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotAllowDeletionForList.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotDefineMultipleContentTypeGroupInOneElementFile.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotDefineMultipleFieldGroupInOneElementFile.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotDeployTaxonomyFieldsInListDefinition.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotIndexNoteField.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotProvisionLookupFieldBeforeRelatedList.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotUseSystemListNames.md" />
+    <None Include="Data\ReSP\Inspections\xml\DoNotUseUnderscoreInFieldName.md" />
+    <None Include="Data\ReSP\Inspections\xml\EnsureFolderContentTypeInListDefinition.md" />
+    <None Include="Data\ReSP\Inspections\xml\FieldIdShouldBeUppercase.md" />
+    <None Include="Data\ReSP\Inspections\xml\FieldNameLengthLimitExceed.md" />
+    <None Include="Data\ReSP\Inspections\xml\index.md" />
+    <None Include="Data\ReSP\Inspections\xml\MixedIDInFieldName.md" />
+    <None Include="Data\ReSP\Inspections\xml\NameWithPictureForUserField.md" />
+    <None Include="Data\ReSP\Inspections\xml\NotProvisionedEntity.md" />
+    <None Include="Data\ReSP\Inspections\xml\RepeatCalculatedFieldsInListSchema.md" />
+    <None Include="Data\ReSP\Inspections\xml\RepeatLookupFieldsInListSchema.md" />
+    <None Include="Data\ReSP\Inspections\xml\UniqueFieldName.md" />
+    <None Include="Data\ReSP\Inspections\xml\UniqueFieldStaticName.md" />
+    <None Include="Data\ReSP\Inspections\xml\UniqueListInstanceTitle.md" />
+    <None Include="Data\ReSP\Inspections\xml\UniqueListInstanceUrl.md" />
+    <None Include="Data\ReSP\Inspections\xml\WebPartDefinitionMightBeImproved.md" />
+    <None Include="Data\ReSP\Inspections\xml\WebPartModuleDefinitionMightbeImproved.md" />
+    <None Include="Data\ReSP\Inspections\xml\WrongFeatureIdInListInstance.md" />
+    <None Include="Data\ReSP\kb\_Index.md" />
+    <None Include="Data\ReSP\live-templates\Index.md" />
+    <None Include="Data\ReSP\live-templates\nsite.md" />
+    <None Include="Data\ReSP\live-templates\nsw.md" />
+    <None Include="Data\ReSP\live-templates\nweb.md" />
+    <None Include="Data\ReSP\live-templates\rwep.md" />
+    <None Include="Data\spmeta2\extensibility\index.md" />
+    <None Include="Data\spmeta2\extensibility\writing-custom-logging.md" />
+    <None Include="Data\spmeta2\getting-started\Basics\Basics-BasicsClass.smpindx" />
+    <None Include="Data\spmeta2\getting-started\ConsoleAppSamples\ConsoleApSamples-ConsoleApSamplesClass.smpindx" />
+    <None Include="Data\spmeta2\getting-started\index.md" />
+    <None Include="Data\spmeta2\getting-started\License.md" />
+    <None Include="Data\spmeta2\getting-started\Releases.md" />
+    <None Include="Data\spmeta2\getting-started\writing-console-app.md" />
+    <None Include="Data\spmeta2\getting-started\_csom-provision.md" />
+    <None Include="Data\spmeta2\getting-started\_FAQ.md" />
+    <None Include="Data\spmeta2\getting-started\_installing-spmeta2.md" />
+    <None Include="Data\spmeta2\getting-started\_Logging.md" />
+    <None Include="Data\spmeta2\getting-started\_o365-provision.md" />
+    <None Include="Data\spmeta2\getting-started\_ssom-provision.md" />
+    <None Include="Data\spmeta2\getting-started\_Support.md" />
+    <None Include="Data\spmeta2\index.md" />
+    <None Include="Data\spmeta2\kb\Index.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000001.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000002.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000003.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000004.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000005.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000006.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000007.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000008.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000009.md" />
+    <None Include="Data\spmeta2\kb\kb-m2-000010.md" />
+    <None Include="Data\spmeta2\reference\Definitions.md" />
+    <None Include="Data\spmeta2\reference\index.md" />
+    <None Include="Data\spmeta2\reference\Models.md" />
+    <None Include="Data\spmeta2\reference\ProvisionServices.md" />
+    <None Include="Data\spmeta2\reference\sp-foundation-definitions\Index.md" />
+    <None Include="Data\spmeta2\reference\sp-standard-definitions\index.md" />
+    <None Include="Data\spmeta2\reference\Utils.md" />
+    <None Include="Data\spmeta2\reference\_SiteModel.md" />
+    <None Include="Data\spmeta2\reference\_WebModel.md" />
+    <None Include="Data\spmeta2\scenarios\Index.md" />
+    <None Include="Data\spmeta2\scenarios\_Sample Repository.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\metapack\cli\index.md" />
+    <None Include="Data\metapack\extensibility\index.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\ReSP\code-completion\_img\bulk-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\bulk-300x69.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\bulk.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\bulk_inspection-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\bulk_inspection-300x227.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\bulk_inspection.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\CommandUIDefinitionLocation-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\CommandUIDefinitionLocation-300x141.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\CommandUIDefinitionLocation.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentPlaceHolderId-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentPlaceHolderId-300x133.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentPlaceHolderId.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingContentTypeId-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingContentTypeId-300x93.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingContentTypeId.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingListUrl-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingListUrl-300x106.png" />
+    <Content Include="Data\ReSP\code-completion\_img\ContentTypeBindingListUrl.png" />
+    <Content Include="Data\ReSP\code-completion\_img\controlsrc-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\controlsrc-300x118.png" />
+    <Content Include="Data\ReSP\code-completion\_img\controlsrc.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionLocation-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionLocation-300x157.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionLocation.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionRegistrationType-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionRegistrationType-300x153.png" />
+    <Content Include="Data\ReSP\code-completion\_img\CustomActionRegistrationType.png" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_registrationtype-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_registrationtype-300x196.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_registrationtype.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_rights-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_rights-300x185.png" />
+    <Content Include="Data\ReSP\code-completion\_img\customaction_rights.png" />
+    <Content Include="Data\ReSP\code-completion\_img\disable_rule-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\disable_rule-300x263.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\disable_rule.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\featureid-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\featureid-300x141.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\featureid.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationFeatureId-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationFeatureId-300x118.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationFeatureId.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationTemplateName-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationTemplateName-300x118.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FeatureSiteTemplateAssociationTemplateName.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldgroup-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldgroup-300x110.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldgroup.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldref-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldref-300x151.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldref.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldtype-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldtype-300x154.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\fieldtype.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FileContentType-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FileContentType-300x122.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FileContentType.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingAssociatedContentType-1024x281.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingAssociatedContentType-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingAssociatedContentType-300x82.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingAssociatedContentType.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingPageLayout-1024x281.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingPageLayout-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingPageLayout-300x82.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\FilePublishingPageLayout.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\getting-started-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\getting-started-300x168.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\getting-started.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\get_help-150x149.png" />
+    <Content Include="Data\ReSP\code-completion\_img\get_help-300x67.png" />
+    <Content Include="Data\ReSP\code-completion\_img\get_help.png" />
+    <Content Include="Data\ReSP\code-completion\_img\listurl-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\listurl-300x144.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\listurl.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsite-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsite-300x168.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsite.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsw-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsw-300x168.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nsw.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nweb-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nweb-300x168.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\nweb.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\rwep-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\rwep-300x119.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\rwep.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\settings-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\settings-300x186.png" />
+    <Content Include="Data\ReSP\code-completion\_img\settings.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working-150x150.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working-300x123.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working1-150x57.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working1-300x34.png" />
+    <Content Include="Data\ReSP\code-completion\_img\sp-working1.png" />
+    <Content Include="Data\ReSP\code-completion\_img\SPCAF_FB.jpg" />
+    <Content Include="Data\ReSP\code-completion\_img\SPItemEventProperties-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\SPItemEventProperties-300x211.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\SPItemEventProperties.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\SPWebCollectionAdd1-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\SPWebCollectionAdd1-300x140.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\SPWebCollectionAdd1.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\templatetype-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\templatetype-300x153.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\templatetype.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UseBuiltInFieldsInsteadOfStrings-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UseBuiltInFieldsInsteadOfStrings-300x122.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UseBuiltInFieldsInsteadOfStrings.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UserProfilePropertyName-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UserProfilePropertyName-300x160.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\UserProfilePropertyName.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webpartgroup-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webpartgroup-300x194.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webpartgroup.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webparttitle-150x150.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webparttitle-300x97.gif" />
+    <Content Include="Data\ReSP\code-completion\_img\webparttitle.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\bulk_inspection-150x150.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\bulk_inspection-300x227.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\bulk_inspection.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\disable_rule-150x150.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\disable_rule-300x263.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\disable_rule.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\getting-started-150x150.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\getting-started-300x168.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\getting-started.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\getting.gif" />
+    <Content Include="Data\ReSP\getting-started\_img\get_help-150x149.png" />
+    <Content Include="Data\ReSP\getting-started\_img\get_help-300x67.png" />
+    <Content Include="Data\ReSP\getting-started\_img\get_help.png" />
+    <Content Include="Data\ReSP\getting-started\_img\settings-150x150.png" />
+    <Content Include="Data\ReSP\getting-started\_img\settings-300x186.png" />
+    <Content Include="Data\ReSP\getting-started\_img\settings.png" />
+    <Content Include="Data\ReSP\Inspections\aspnet\SPDataSourceScopeDoesNotDefinedInPage.xml" />
+    <Content Include="Data\ReSP\Inspections\csharp\AvoidJQueryDocumentReadyInCode.html" />
+    <Content Include="Data\ReSP\Inspections\javascript\AvoidJQueryDocumentReady.html" />
+    <Content Include="Data\ReSP\Inspections\xml\AvoidCommentsForContentType.xml" />
+    <Content Include="Data\ReSP\Inspections\xml\AvoidListContentTypes.xml" />
+    <Content Include="Data\ReSP\Inspections\xml\DeclareEmptyFieldsElement.xml" />
+    <Content Include="Data\ReSP\Inspections\xml\DoNotIndexNoteField.xml" />
+    <Content Include="Data\ReSP\Inspections\xml\MixedIDInFieldName.xml" />
+    <Content Include="Data\ReSP\Inspections\xml\WebPartDefinitionMightBeImproved.xml" />
+    <Content Include="Data\ReSP\live-templates\_img\nsite-150x150.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nsite-300x168.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nsite.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nsw-150x150.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nsw-300x168.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nsw.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nweb-150x150.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nweb-300x168.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\nweb.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\rwep-150x150.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\rwep-300x119.gif" />
+    <Content Include="Data\ReSP\live-templates\_img\rwep.gif" />
+    <Content Include="Data\spmeta2\getting-started\_img\1-new-console-app.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SubPointSolutions.DocIndex\SubPointSolutions.DocIndex.csproj">
+      <Project>{2BD7B36B-D116-4DC3-BD58-DCC2FD6D6157}</Project>
+      <Name>SubPointSolutions.DocIndex</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\metapack\getting-started\_samples\" />
+    <Folder Include="Data\ReSP\Inspections\aspnet\_samples\" />
+    <Folder Include="Data\ReSP\Inspections\csharp\_samples\" />
+    <Folder Include="Data\ReSP\Inspections\javascript\_samples\" />
+    <Folder Include="Data\ReSP\Inspections\xml\_samples\" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

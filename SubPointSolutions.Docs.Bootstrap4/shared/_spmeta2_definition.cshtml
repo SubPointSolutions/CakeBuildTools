@@ -1,0 +1,91 @@
+@using System;
+@using System.Linq
+@using System.Collections;
+@using System.Collections.Generic;
+
+
+@{
+    Layout = "_master.cshtml";
+}
+
+@{
+    // var definitionName = Model.String("SourceFileBase").Replace("Tests", string.Empty);
+    // var samples = WyamHelper.Samples.Where(s => s.IsMethod).ToList().Where(s => s.ClassName.StartsWith(definitionName));
+
+    // var allHandlers = new List<Type>();
+
+    // // built in
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(FieldDefinition).Assembly));
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(AudienceDefinition).Assembly));
+
+    // // csom
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(CSOMProvisionService).Assembly));
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(StandardCSOMProvisionService).Assembly));
+
+    // // ssom
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(SSOMProvisionService).Assembly));
+    // allHandlers.AddRange(ReflectionUtils.GetTypesFromAssembly<ModelHandlerBase>(typeof(StandardSSOMProvisionService).Assembly));
+
+    // var modelHandlerName = definitionName.Replace("Definition", "ModelHandler").ToLower();
+
+    // var supportsCSOM = allHandlers.Any(h => h.Name.ToLower().StartsWith(modelHandlerName)
+    //                                             && h.FullName.ToLower().Contains("csom"));
+    // var supportsSSOM = allHandlers.Any(h => h.Name.ToLower().StartsWith(modelHandlerName)
+    //                                             && h.FullName.ToLower().Contains("ssom"));
+
+    // var csomLabel = supportsCSOM ? "label-success" : "label-default";
+    // var ssomLabel = supportsSSOM ? "label-success" : "label-default";
+
+    // var allDefinitions = new List<Type>();
+
+    // // built in
+    // allDefinitions.AddRange(ReflectionUtils.GetTypesFromAssembly<DefinitionBase>(typeof(FieldDefinition).Assembly));
+    // allDefinitions.AddRange(ReflectionUtils.GetTypesFromAssembly<DefinitionBase>(typeof(AudienceDefinition).Assembly));
+
+
+    // var scopes = new List<string>();
+
+    // var definitionClassType = allDefinitions.FirstOrDefault(c => c.Name.ToLower().StartsWith(definitionName.ToLower()));
+
+    // if (definitionClassType != null)
+    // {
+    //     var parentHosts = definitionClassType
+    //                                 .GetCustomAttributes(true)
+    //                                 .OfType<ParentHostCapabilityAttribute>()
+    //                                 .ToList();
+
+    //     foreach (var parent in parentHosts)
+    //     {
+    //         var scopeName = parent.HostType.Name.Replace("Definition", String.Empty);
+    //         scopes.Add(scopeName);
+    //     }
+    // }
+}
+
+<div class="container">
+    <div class="row body">
+       
+        <div class="col-12 p-3 d-second-nav-container">
+            @Html.Partial("partials/_nav_second")
+        </div>        
+
+        <div class="col-lg-3 p-3">
+            @Html.Partial("partials/_nav_left")
+        </div>
+
+        <div class="col-lg-9 p-3">
+
+            <h3>API support</h3>
+           
+
+            <h3>Can be deployed under</h3>
+           
+
+            <h3>Notes</h3>
+            @RenderBody()         
+
+            <h3>Examples</h3>
+           
+        </div>
+    </div>
+</div>

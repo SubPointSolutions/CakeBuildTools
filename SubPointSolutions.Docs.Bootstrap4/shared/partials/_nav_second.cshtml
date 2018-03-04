@@ -1,82 +1,20 @@
-@functions
-{
-    public static String GetSecondNavigationRalativePath(IDocument currentDocument) {
-        var relativePath = currentDocument.Get<String>("RelativeFilePathBase");
-
-        var parts = relativePath.Split('/');
-        return String.Join(@"/", parts.Take(1));
-    }
-
-    public static List<IDocument> GetSecondNavigation(IEnumerable<IDocument> documents, IDocument currentDocument) {
-        
-        var secondNavRelativePath = GetSecondNavigationRalativePath(currentDocument);
-
-        var tiles = documents
-                .Where(x => WyamHelper.HasNonEmptyAttributes(x, new []{
-                    WyamHelper.Attributes.NavTopNodeTitle,
-                    WyamHelper.Attributes.NavTopNodeOrder
-                })) 
-                .Where(x => GetSecondNavigationRalativePath(x) == secondNavRelativePath)
-            .OrderBy(x => x.Get<int>(WyamHelper.Attributes.NavTopNodeOrder, 0))
-            .ToList();
-
-        return tiles;
-    }
-
-    public static bool IsNavSecondActiveDocument(IDocument currentDocument, IDocument document) {
-
-        var navDocumentRelativeDirPath = document.Get<String>("RelativeFileDir");
-        var navDocumentRelativeFilePath = document.Get<String>("RelativeFilePath");
-
-        var parts = navDocumentRelativeFilePath.Split('/').ToList();
-
-        if(parts.Count() == 2 && parts[1].ToLower() == "index.md") {
-            return currentDocument.Get<String>("RelativeFilePath").ToUpper().StartsWith(
-                    navDocumentRelativeFilePath.ToUpper()
-                );
-        }
-
-        return currentDocument.Get<String>("RelativeFileDir").ToUpper().StartsWith(
-                    navDocumentRelativeDirPath.ToUpper()
-                );
-    }
-
-    public static String GetNavSecondActiveDocumentClass(IDocument currentDocument, IDocument document) {
-        var result = String.Empty;
-
-        if(IsNavSecondActiveDocument(currentDocument, document)) {
-            return "active";
-        }
-
-        return result;
-    }
+@{
+    var navService = NavigationService.GetInstance(Documents);
+    
+    var topNavigationNodes = navService.GetTopNavigationForDocument(Model);
 }
-<!-- 
-<div class="container">
-    <div class="d-nav-second">
-        <ul class="list-inline">
-                @foreach(var document in GetSecondNavigation(Documents, Model)) {
-                    var url = WyamHelper.GetUrl(document);
-                    var title = document.Get<String>(WyamHelper.Attributes.NavTopNodeTitle);
-                    var activeClass = GetNavSecondActiveDocumentClass(Model, document);
 
-                    <li class="list-inline-item @activeClass">
-                        <a class="@activeClass" href="@url">
-                            @title
-                        </a>
-                    </li>
-                }
-        </ul>
-    </div>  
-</div> -->
+@if(topNavigationNodes.Any()) {
 
 <div class="justify-content-center">
     <ul class="nav nav-pills justify-content-center1">
 
-        @foreach(var document in GetSecondNavigation(Documents, Model)) {
+       @foreach(var topNavigationNode in topNavigationNodes) {
+            var document = topNavigationNode.Document;
+
             var url = WyamHelper.GetUrl(document);
-            var title = document.Get<String>(WyamHelper.Attributes.NavTopNodeTitle);
-            var activeClass = GetNavSecondActiveDocumentClass(Model, document);
+            var title = document.Get<String>(WyamHelper.Attributes.Title);
+            var activeClass = navService.IsActiveTopNavigationNode(document, Model) ? "active" : "";
 
             <li class="nav-item">
                 <a class="nav-link @activeClass" href="@url">
@@ -84,7 +22,8 @@
                 </a>
             </li>
         }
+        
     </ul>
 </div>    
 
-
+}

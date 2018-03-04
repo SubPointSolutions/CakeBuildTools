@@ -12,6 +12,9 @@ Nav.LeftNodeTitle:  "Home"
 Project.LinkTitle:  "Home"
 Project.LinkOrder:  10
 
+Docs.Navigation:
+  - "cakebuildtools/index.md"
+
 ---
 
 # SubPointSolutions.CakeBuildTools

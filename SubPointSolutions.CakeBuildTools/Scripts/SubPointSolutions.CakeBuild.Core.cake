@@ -5,14 +5,12 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Wyam
 
 #tool nuget:https://www.nuget.org/api/v2/?package=Octokit&version=0.28.0
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc
-#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http
-#tool nuget:https://www.nuget.org/api/v2/?package=Wyam
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor&version=3.2.4
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc&version=5.2.4
+#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&version=3.10.0
+#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http&version=2.2.29
 
 #reference "tools/Octokit.0.28.0/lib/net45/Octokit.dll"
 #reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
@@ -21,7 +19,239 @@
 #reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
 #reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
 
-var version = "0.1.1-beta8";
+var version = "0.2.1-beta2";
+
+// 0.3.0 migration start
+var jsonConfigPath = Argument("jsonConfig", "build.json");
+var serviceContainer = ServiceContainer.Instance;
+
+serviceContainer.RegisterService(
+                    typeof(ConfigService), 
+                    new ConfigService(jsonConfigPath) 
+                );
+
+var configService = serviceContainer.GetService<ConfigService>();
+
+// base classes                
+public class BuildProfile {
+    public string Name { get; set; }
+}
+
+public class BuildServiceBase
+{
+    public static string Version = "0.3.0-beta1";
+    public ICakeContext CakeContext { get; set; }
+
+    public string GetConfigValue(string name, string defaultValue)
+    {
+        return null;
+    }
+
+    public bool FileExists(string path)
+    {
+        return System.IO.File.Exists(path);
+    }
+
+    protected string GetFullPath(string path)
+    {
+        return System.IO.Path.GetFullPath(path);
+    }
+
+    protected void WithDebug(string message, Action action) {
+        
+        Debug("Running: " + message);
+
+        action();
+
+        Debug("Finished running: " + message);
+    }
+
+    protected enum LogLevel {
+        Info,
+        Debug,
+        Error
+    }
+
+    protected ConsoleColor GetColor(LogLevel level) {
+        switch(level) {
+            case LogLevel.Info:
+                return ConsoleColor.Green;
+            case LogLevel.Debug:
+                return ConsoleColor.Magenta;
+            case LogLevel.Error:
+                return ConsoleColor.Red;
+        }
+
+         return ConsoleColor.White;
+    }
+
+    protected void TraceMessage(string message, LogLevel level) {
+        try {
+
+            Console.ForegroundColor = GetColor(level);
+
+            var timestamp = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ff");
+            var formattedMessage = String.Format("{0} {1} {2} {3}", new []{
+                "CakeBuildTools",
+                timestamp,
+                GetLevel(level),
+                GetMessage(message, level)
+            });
+
+            Console.WriteLine(formattedMessage);
+        } finally {
+            Console.ResetColor();
+        }
+    }
+
+    protected string GetMessage(String message, LogLevel level) {
+        if(level == LogLevel.Debug) {
+            return "    " + message;
+        }
+
+        return message;
+    }
+
+    protected string GetLevel(LogLevel level) {
+        return (level.ToString().ToUpper() + "      ").Substring(0, 6);
+    }
+
+    public void Info(string message) { 
+        TraceMessage(message, LogLevel.Info);
+    }
+
+    public void Info(string message,  params object[] args) { 
+        Info(string.Format(message, args));
+    }
+
+    public void Debug(string message) { 
+        TraceMessage(message, LogLevel.Debug);
+    }
+
+    public void Debug(string message, params object[] args) { 
+        Debug(string.Format(message, args));
+    }
+
+    public void Error(string message) { 
+        TraceMessage(message, LogLevel.Error);
+    }
+
+    protected ConfigService ConfigService {
+        get {
+            return ServiceContainer.GetService<ConfigService>();
+        }
+    }
+
+    protected ServiceContainer ServiceContainer {
+        get {
+            return ServiceContainer.Instance;
+        }
+    }
+}
+
+public class ConfigurableBuildService<T> : BuildServiceBase
+    where T : BuildProfile, new ()
+{
+    public ConfigurableBuildService() {
+        Profiles = new List<T>();
+    }
+
+    protected List<T> Profiles;
+
+    public String ProfileName { get; set; }
+
+    protected T Profile {
+        get 
+        {
+            var profile = Profiles.FirstOrDefault(p => p.Name == ProfileName);
+
+            if(profile == null) {
+                var message = "Cannot find profile by name: " + ProfileName;
+                Error(message);
+
+                throw new Exception(message);
+            }
+
+            return profile;
+        }
+    }
+}
+
+public class ConfigService : BuildServiceBase
+{
+    public ConfigService() : this("build.json")
+    {
+
+    }
+
+    public ConfigService(String path)
+    {
+        if (!FileExists(path))
+        {
+            throw new Exception("Cannot find file: " + path);
+        }
+
+        Config = Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText(path));
+    }
+
+    public Newtonsoft.Json.Linq.JObject Config { get; set; }
+   
+    public string Target { get; set; } 
+    public string Configuration { get; set; } 
+
+    public string SolutionDirectory {
+        get {
+            return GetFullPath((string)Config["defaultSolutionDirectory"]);
+        }
+    }
+
+    public void TraceSystemInfo() {
+        Info(String.Format("Running SubPointSolutions.CakeBuildTools: {0}", Version));
+        Info(String.Format("    - target: {0}", Target));
+        Info(String.Format("    - configuration: {0}", Configuration));
+    }
+}
+
+public class ServiceContainer {
+    public static ServiceContainer Instance { get; set; } 
+
+    static ServiceContainer() {
+        Instance = new ServiceContainer();
+    }
+
+    public ServiceContainer() {
+        Services = new Dictionary<Type, object>();
+    }
+
+    public Dictionary<Type, object> Services { get; private set; }
+
+    public TType GetService<TType>()
+    {
+        var type = typeof(TType);
+
+        if(!Services.ContainsKey(type))
+            throw new Exception("Cannot find service for type: " + type.ToString());
+
+        return (TType)Services[type]; 
+    }
+
+    public void RegisterService(Type type, object instance) {
+        if(Services.ContainsKey(type))
+            Services[type] = instance;
+        else
+            Services.Add(type, instance);
+    }
+}
+
+var target = Argument("target", "Default");
+var configuration = Argument("configuration", "Debug");
+
+configService.Target = target;
+configService.Configuration =configuration;
+
+configService.TraceSystemInfo();
+
+// 0.3.0 migration end
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
@@ -33,9 +263,6 @@ Setup(ctx => {
 
 // variables
 // * defaultXXX - shared, common settings from json config
-var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Debug");
-
 Verbose("Reading build.json");
 var jsonConfig = Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText("build.json"));
 
@@ -974,33 +1201,20 @@ Information("Loading web deploy variables...");
 var defaultWebDeployPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployPackageDir", "./build-artifact-webdeploy"));
 var defaultWebDeployTmpPackageDir = GetFullPath(GetSafeConfigValue("defaultWebDeployTmpPackageDir", "./build-artifact-webdeploy-tmp"));
 
-Information("3");
-
 System.IO.Directory.CreateDirectory(defaultWebDeployPackageDir);
 System.IO.Directory.CreateDirectory(defaultWebDeployTmpPackageDir);
-
-
-Information("4");
 
 // test settings
 var defaultTestCategories = jsonConfig["defaultTestCategories"].Select(t => (string)t).ToList();
 var defaultTestAssemblyPaths = jsonConfig["defaultTestAssemblyPaths"].Select(t => GetFullPath(defaultSolutionDirectory + "/" + (string)t)).ToList();
 
-
-Information("5");
-
 // build settings
 var defaultBuildDirs = jsonConfig["defaultBuildDirs"].Select(t => new DirectoryPath(GetFullPath((string)t))).ToList();
 var defaultEnvironmentVariables = jsonConfig["defaultEnvironmentVariables"].Select(t => (string)t).ToList();
 
-
-
 // refine defaultBuildDirs - everything with *.csprj in the folder + /bin
 //effectively, looking for all cs projects within solution
 defaultBuildDirs.AddRange(GetAllProjectDirectories(defaultSolutionDirectory));
-
-
-Information("6");
 
 // default dirs for chocol and nuget packages
 defaultBuildDirs.Add(ResolveFullPathFromSolutionRelativePath(defaultChocolateyPackagesDirectory));
@@ -1920,309 +2134,6 @@ var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
         }
     });
 
-void BuildWyam(WyamSettings settings)
-{
-    BuildWyam(settings, defaultWyamPreviewPort, GetWyamOutputDirectory());
-}
-
-string GetWyamOutputDirectory()
-{
-    var outputPath = defaultWyamOutputDir;
-
-    if (String.IsNullOrEmpty(outputPath))
-    {
-        var tmpFolderPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-        outputPath = tmpFolderPath;
-    }
-
-    System.IO.Directory.CreateDirectory(outputPath);
-
-    return outputPath;
-}
-
-void BuildWyam(WyamSettings settings, int port, String outputPath)
-{
-
-    settings.PreviewPort = port;
-    settings.OutputPath = outputPath;
-
-    Information(String.Format("Wyam output path: {0}", outputPath));
-
-    Wyam(settings);
-}
-
-WyamSettings GetDefaultWyamSettings()
-{
-    return GetDefaultWyamSettings(null);
-}
-
-WyamSettings GetDefaultWyamSettings(Action<WyamSettings> action)
-{
-
-    var projectName = defaultWyamProjectName;
-    var targetFolderPath = System.IO.Path.Combine(defaultSolutionDirectory, projectName + "\\" + defaultWyamInputDir);
-
-    if (!System.IO.Directory.Exists(targetFolderPath))
-    {
-        throw new Exception(String.Format("Path does not exist: {0}", targetFolderPath));
-    }
-
-    Information(String.Format("Building Wyam project: {0}", targetFolderPath));
-    Information(String.Format(" - recipe: {0}", defaultWyamRecipe));
-    Information(String.Format(" - theme: {0}", defaultWyamTheme));
-
-    var wyamSettings = new WyamSettings
-    {
-        RootPath = System.IO.Path.Combine(defaultSolutionDirectory, projectName),
-        InputPaths = new[] { new Cake.Core.IO.DirectoryPath(targetFolderPath) },
-        Preview = false,
-        Watch = false
-    };
-
-    if (!String.IsNullOrEmpty(defaultWyamRecipe))
-    {
-        wyamSettings.Recipe = defaultWyamRecipe;
-    }
-
-    if (!String.IsNullOrEmpty(defaultWyamTheme))
-    {
-        wyamSettings.Theme = defaultWyamTheme;
-    };
-
-    wyamSettings.ConfigurationFile = LookupWyamConfigFile();
-
-    if (action != null)
-    {
-        action(wyamSettings);
-    }
-
-    return wyamSettings;
-}
-
-
-Dictionary<string, string> GetWyamThemeConfigs()
-{
-
-    var result = new Dictionary<string, string>();
-
-    PreInstallWyamPackages();
-
-    var themeName = defaultWyamTheme;
-    var themeDir = GetTemporaryWyamThemeFolder() + "/" + themeName;
-
-    var configFolder = themeDir + "/content/.config";
-
-    if (System.IO.Directory.Exists(configFolder))
-    {
-        Information("Looking for theme based wyam configs: {0}", configFolder);
-
-        var filePaths = System.IO.Directory.GetFiles(configFolder);
-        var dstFolderPath = GetWyamOutputDirectory();
-
-        foreach (var filePath in filePaths)
-        {
-            var key = System.IO.Path.GetFileName(filePath);
-            var path = System.IO.Path.GetFullPath(filePath);
-
-            Information("mapping theme based config");
-            Information("   - key: " + key);
-            Information("   - path: " + path);
-
-            result.Add(key, path);
-
-        }
-    }
-    else
-    {
-        Information("Looking for theme based wyam configs folder does not exist: {0}", configFolder);
-    }
-
-    return result;
-}
-
-string GetTemporaryWyamThemeFolder()
-{
-    var path = "build-artifact-wyam-themes-tmp";
-
-    System.IO.Directory.CreateDirectory(path);
-
-    return System.IO.Path.GetFullPath(path);
-}
-
-string GetTemporaryWyamThemeConfigFolder()
-{
-
-    var path = "build-artifact-wyam-themes-config-tmp";
-
-    System.IO.Directory.CreateDirectory(path);
-
-    return System.IO.Path.GetFullPath(path);
-}
-
-void PreInstallWyamPackages()
-{
-    var nugetPackages = GetWyamNuGetPackages();
-
-    foreach (var nugetPackage in nugetPackages)
-    {
-        Information("Preinstalling Wyam's NuGet package: {0}", nugetPackage.Package);
-
-        var packageName = nugetPackage.Package;
-        var installSetting = new NuGetInstallSettings();
-
-        installSetting.ExcludeVersion = true;
-        installSetting.OutputDirectory = GetTemporaryWyamThemeFolder();
-
-        if (nugetPackage.Source != null)
-        {
-            installSetting.Source = nugetPackage.Source.ToArray();
-        }
-
-        if (!String.IsNullOrEmpty(nugetPackage.Version))
-        {
-            installSetting.Version = nugetPackage.Version;
-        }
-
-        Information("   - running NuGetInstall...");
-        NuGetInstall(packageName, installSetting);
-    }
-}
-
-string LookupWyamConfigFile()
-{
-    var result = defaultWyamConfigFile;
-
-    var themeConfigs = GetWyamThemeConfigs();
-
-    if (themeConfigs.Keys.Contains(defaultWyamConfigFile))
-    {
-
-        result = themeConfigs[defaultWyamConfigFile];
-        // we need to copy wyam config file into a save folder
-        // original location could be overwritten with package restore (new theme update)
-        // that triggers deletion Wyam's cachece and foo..packages.xml file
-        // in turn, a full NuGet restore is run over all Wyam packages
-
-        // hence, copying this file into _wyam_themes_config folde
-        var srcFilePath = result;
-
-        var dstFolderPath = GetTemporaryWyamThemeConfigFolder();
-        var dstFilePath = dstFolderPath + "/" + System.IO.Path.GetFileName(srcFilePath);
-
-        Information("   - copying file");
-        Information("       - src: " + srcFilePath);
-        Information("       - dst: " + dstFilePath);
-
-        System.IO.File.Copy(srcFilePath, dstFilePath, true);
-        result = dstFilePath;
-
-        Information("   - using custom, theme based-wyam config: " + result);
-    }
-    else
-    {
-        Information("   - using default wyam config: " + result);
-    }
-
-    return result;
-}
-
-
-// builds Wyam based project
-var defaultActionWyam = Task("Action-Wyam")
-    .Does(() =>
-    {
-        var nugetPackages = GetWyamNuGetPackages();
-
-        BuildWyam(GetDefaultWyamSettings(settings => {
-            settings.NuGetPackages = nugetPackages;
-        }));
-    });
-
-List<NuGetSettings> GetWyamNuGetPackages()
-{
-    var nugetPackages = new List<NuGetSettings>();
-    var specs = jsonConfig["defaultWyamNuGetPackages"];
-
-    foreach (var spec in specs)
-    {
-        var id = (string)spec["Id"];
-        var version = (string)spec["Version"];
-        IEnumerable<string> source = null;
-
-        if (spec["Source"] != null)
-        {
-            source = spec["Source"].Select(t => (string)t).ToArray();
-        }
-
-        var nugetSpec = new NuGetSettings();
-
-        nugetSpec.Package = id;
-
-        if (!String.IsNullOrEmpty(version))
-        {
-            nugetSpec.Version = version;
-        }
-
-        if (source != null)
-        {
-            nugetSpec.Source = source;
-        }
-
-        nugetPackages.Add(nugetSpec);
-    }
-
-    return nugetPackages;
-}
-
-var defaultActionWyamPreview = Task("Action-WyamPreview")
-    .Does(() =>
-    {
-        var nugetPackages = GetWyamNuGetPackages();
-
-        BuildWyam(GetDefaultWyamSettings(settings => {
-            settings.Preview = true;
-            settings.Watch = true;
-            settings.NuGetPackages = nugetPackages;
-        }));
-    });
-
-var defaultActionWyamVerifyConfig = Task("Action-WyamVerifyConfig")
-    .Does(() =>
-    {
-        BuildWyam(GetDefaultWyamSettings(settings => {
-            settings.VerifyConfig = true;
-            settings.NoCache = true;
-        }));
-    });
-
-var defaultNetlifyPublish = Task("Action-NetlifyPublish")
-    .Does(() =>
-    {
-        Information("Publishing netlify web site...");
-        var psSettings = new PowershellSettings()
-        {
-            LogOutput = false,
-            OutputToAppConsole = false
-        };
-
-        var netlifySiteId = GetGlobalEnvironmentVariable("ci.netlify.siteid-" + ciBranch);
-        var netlifyApiKey = GetGlobalEnvironmentVariable("ci.netlify.apikey-" + ciBranch);
-        var contentFolder = GetGlobalEnvironmentVariable("ci.netlify.content-folder-" + ciBranch);
-        
-        if (String.IsNullOrEmpty(netlifySiteId)) { throw new Exception("ci.netlify.siteid is null r emty for env: " + ciBranch); }
-        if (String.IsNullOrEmpty(netlifyApiKey)) { throw new Exception("ci.netlify.apikey is null r emty for env: " + ciBranch); }
-        if (String.IsNullOrEmpty(contentFolder)) { contentFolder = defaultWyamOutputDir; }
-        
-        var cmd = new [] {
-            "choco install -y nodejs",
-            "npm install netlify-cli -g --suppess-warnings --loglevel=error",
-            "netlify --version",
-            string.Format("netlify deploy -s {0} -t {1} -p {2}", netlifySiteId, netlifyApiKey, contentFolder)
-        };
-
-        StartPowershellScript(string.Join(Environment.NewLine, cmd), psSettings);
-    });
-
 
 // Action-XXX - common tasks
 // * Action-Validate-Environment
@@ -2251,13 +2162,6 @@ var defaultNetlifyPublish = Task("Action-NetlifyPublish")
 // such as Pester regression testing on console app and so on
 var taskDefault = Task("Default")
     .IsDependentOn("Default-Run-UnitTests");
-
-var taskDefaultWyam = Task("Default-Wyam")
-    .IsDependentOn("Action-Wyam");
-
-var taskDefaultWyamPublish = Task("Default-WyamPublish")
-    .IsDependentOn("Action-Wyam")
-    .IsDependentOn("Action-NetlifyPublish");
 
 var taskDefaultClean = Task("Default-Clean")
     .IsDependentOn("Action-Validate-Environment")

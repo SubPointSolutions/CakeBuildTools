@@ -159,3 +159,9 @@ packages
 .vs
 /SubPointSolutions.CakeBuildTools/packages.config
 /SubPointSolutions.CakeBuildTools/app.config
+/Docs/.tmp
+/.tmp
+
+*.wyam.dll
+*.wyam.hash
+*.wyam.packages.xml

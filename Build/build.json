@@ -1,105 +1,149 @@
 ﻿{
-    "defaultSolutionDirectory": "./../",
-    "defaultSolutionFilePath": "./../SubPointSolutions.CakeBuildTools.sln",
-    "defaultNuGetPackagesDirectory": "./build-artifact-nuget-packages",
-    "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
-    "defaultNuspecVersion": "0.1.0",
+  "defaultSolutionDirectory": "./../",
+  "defaultSolutionFilePath": "./../SubPointSolutions.CakeBuildTools.sln",
+  "defaultNuGetPackagesDirectory": "./build-artifact-nuget-packages",
+  "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
+  "defaultNuspecVersion": "0.1.0",
 
-    "defaultDocsBuildEnabled": true,
-    "defaultDocsViewFolder": "docs/input",
-    "defaultDocsSamplesFolder": "",
-    "defaultDocsRepoFolder": "sps-cakebuildtools",
-    "defaultDocsBranch": "wyam-latest",
-    "defaultDocsFileExtensions": [
-        "*.md"
-    ],
+  "wyam": [
+    {
+      "Name": "dev",
 
-    "defaultWyamProjectName" : "Docs", 
-    "defaultWyamTheme"       : "SubPointSolutions.Docs.Bootstrap4",
-    "defaultWyamRecipe"      : "",
-    "defaultWyamPreviewPort" : "5069",
-    "defaultWyamConfigFile"  : "sps.docs.wyam",
-   
-    "defaultWyamNuGetPackages": [
-      {
-        "Id": "SubPointSolutions.Docs.Bootstrap4",
-        "Version": "",
-        "Source": [
-          "https://www.nuget.org/api/v2/",
-          "https://www.myget.org/F/subpointsolutions-staging/api/v2",
-          "https://ci.appveyor.com/nuget/subpointsolutions-cakebuildtools"
-        ]
-      }
-    ],
+      "inputDirs": [
+        "Docs/input",
+        "SubPointSolutions.Docs.Bootstrap4",
+        "Docs/.tmp"
+      ],
+      "rootDir": "Docs/input",
+      "previewPort": "5050",
+      "configFilePath": "SubPointSolutions.Docs.Bootstrap4/.config/sps.docs.wyam"
+    },
+    {
+      "Name": "default",
+      
+      "inputDirs": [
+        "Docs/input",
+        "SubPointSolutions.Docs.Bootstrap4",
+        "Docs/.tmp"
+      ],
+      "rootDir": "Docs/input",
+      "themeName": "SubPointSolutions.Docs.Bootstrap4",
+      "recipeName": "",
+      "previewPort": "5050",
+      "configFilePath": "sps.docs.wyam",
 
-    "defaultTestCategories": [
-        "CI.Core"
-    ],
-    "customNuspecs": [
-      {
-        "Id": "SubPointSolutions.CakeBuildTools",
-        "Version": "0.1.1-beta8",
-        "Dependencies": [ ],
-        "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
-        "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
-        "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
-        "Description": "Provides common build tasks for all SubPoint Solution projects.",
-        "Copyright": "Copyright 2016",
-        "Tags": [
+      "nugetPackages": [
+        {
+          "Package": "SubPointSolutions.Docs.Bootstrap4",
+          "Version": "0.3.5",
+          "Source": [
+            "https://www.nuget.org/api/v2/",
+            "https://www.myget.org/F/subpointsolutions-staging/api/v2",
+            "https://ci.appveyor.com/nuget/subpointsolutions-cakebuildtools"
+          ]
+        }
+      ]
+    }
+  ],
 
-        ],
+  "defaultTestCategories": [
+    "CI.Core"
+  ],
+  "customNuspecs": [
+    {
+      "Id": "SubPointSolutions.CakeBuildTools",
+      "Version": "0.2.0-beta1",
+      "Dependencies": [ ],
+      "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
+      "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
+      "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
+      "Description": "Provides common build tasks for all SubPoint Solution projects.",
+      "Copyright": "Copyright 2016",
+      "Tags": [
 
-        "Files": [
-          {
-            "Target": "lib/net45",
-            "TargetFiles": [
-              "bin/debug/SubPointSolutions.CakeBuildTools.dll",
-              "bin/debug/SubPointSolutions.CakeBuildTools.xml"
-            ]
-          },
-          {
-            "Target": "scripts",
-            "TargetFiles": [
-              "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake"
-            ]
-          }
-        ]
-      },
+      ],
 
-      {
-        "Id": "SubPointSolutions.Docs.Bootstrap4",
-        "Version": "0.2.2",
-        "Dependencies": [ ],
-        "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
-        "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
-        "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
-        "Description": "Provides a common Wyam theme for SubPoint Solution projects.",
-        "Copyright": "Copyright 2016",
-        "Tags": [
-                
-        ],
+      "Files": [
+        {
+          "Target": "scripts",
+          "TargetFiles": [
+            "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake"
+          ]
+        }
+      ]
+    },
 
-        "Files": [
-          {
-            "Target": "content",
-            "TargetFiles": [
-              ".config/**",
-              
-              "css/**",
-              "js/**",
-              
-              "resp/**",
-              "spmeta2/**",
-              
-              "shared/**",
-              
-              "_ViewStart.cshtml",
-              "index.md"
-            ]
-          }
-        ]
-      }
-    ],
+    {
+      "Id": "SubPointSolutions.Docs.Bootstrap4",
+      "Version": "0.3.5",
+      "Dependencies": [ ],
+      "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
+      "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
+      "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
+      "Description": "Provides a common Wyam theme for SubPoint Solution projects.",
+      "Copyright": "Copyright 2016",
+      "Tags": [
+
+      ],
+
+      "Files": [
+        {
+          "Target": "content",
+          "TargetFiles": [
+            ".config/**",
+
+            "css/**",
+            "js/**",
+
+            "resp/**",
+            "spmeta2/**",
+
+            "shared/**",
+
+            "_ViewStart.cshtml",
+            "index.md"
+          ]
+        }
+      ]
+    },
+
+    {
+      "Id": "SubPointSolutions.DocIndex",
+      "Version": "0.1.0-beta1",
+      "Dependencies": [ 
+        {
+          "Id": " Microsoft.CodeAnalysis",
+          "Version": "2.4.0.0"
+        },
+        {
+          "Id": "HtmlAgilityPack",
+          "Version": "1.6.17.0"
+        },
+        {
+          "Id": "Newtonsoft.Json",
+          "Varsion":  "11.0.0.0" 
+        }
+      ],
+      "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
+      "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
+      "IconUrl": "https://raw.githubusercontent.com/SubPointSolutions/spmeta2/dev/SPMeta2/SPMeta2.Dependencies/Images/SPMeta2_64_64.png",
+      "Description": "Generates indexes for code samples",
+      "Copyright": "Copyright 2018",
+      "Tags": [
+
+      ],
+
+      "Files": [
+        {
+          "Target": "lib/net45",
+          "TargetFiles": [
+            "bin/debug/SubPointSolutions.DocIndex.dll",
+            "bin/debug/SubPointSolutions.DocIndex.xml"
+          ]
+        }
+      ],
+    }
+  ],
   "customChocolateySpecs": [
     {
       "Id": "SubPointSolutions.CakeBuildToolsChocolatey",
@@ -123,10 +167,9 @@
       ]
     }
   ],
-    "defaultTestAssemblyPaths": [
-       
-    ],
-    "defaultBuildDirs": [ ],
-    "defaultEnvironmentVariables": [ ]
-}
+  "defaultTestAssemblyPaths": [
 
+  ],
+  "defaultBuildDirs": [ ],
+  "defaultEnvironmentVariables": [ ]
+}

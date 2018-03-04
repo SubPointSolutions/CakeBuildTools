@@ -8,6 +8,11 @@
 #n System.Xml
 #n System.Xml.Linq
 
+#n HtmlAgilityPack
+
+#ns https://www.nuget.org/api/v2
+#ns https://www.myget.org/F/subpointsolutions-staging/api/v2
+
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture
     = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
 
@@ -22,6 +27,14 @@ Console.WriteLine("Running Wyam for env: " + Settings["subpoint.env"]);
 
 public static class WyamHelper
 {
+    static WyamHelper() {
+        InitWyamHelper();
+    }
+
+    static void InitWyamHelper() {
+      
+    }
+
     public static class Attributes {
 
         public static string Title                = "Title";
@@ -49,7 +62,7 @@ public static class WyamHelper
 	}
 
 	public static string GetThemeVersion() {
-		return "0.2.2";
+		return "0.3.5";
 	}
 
 	public static string GetThemeUrl() {
@@ -187,17 +200,16 @@ public static class WyamHelper
 
         try
         {
-            Console.WriteLine("Parsing {0}", doc.Source);
-
             using (var stream = doc.GetStream())
             {
                 htmlDocument = parser.Parse(stream);
             }
         }
         catch(Exception e) {
-             Console.WriteLine("Exception while parsing HTML for {0}: {1}", doc.Source, e.Message);
+            var errorMessage = string.Format("Exception while parsing HTML for {0}: {1}", doc.Source, e.Message);
+             Console.WriteLine(errorMessage);
 
-             return new [] { context.GetDocument(doc) };
+             throw new Exception(errorMessage);
         }
 
         var outerHtml = htmlDocument.DocumentElement.OuterHtml;
@@ -207,15 +219,42 @@ public static class WyamHelper
             var refFileName = System.IO.Path.GetFileNameWithoutExtension(codeRef.GetAttribute("href"));
 
             if(!string.IsNullOrEmpty(refFileName)) {
-                var sample = "hahaha!";
-
-				if(sample != null) {
-                    var sampleContent = "sh my.sh";
-                    var sampleHtmlContent = String.Format("<pre><code>{0}</code></pre>", sampleContent);
-                    
-                    outerHtml = outerHtml.Replace(codeRef.OuterHtml, sampleHtmlContent);
-				}
+                var sampleHtmlContent = "source code sample";
+                outerHtml = outerHtml.Replace(codeRef.OuterHtml, sampleHtmlContent);
             }
+
+            // if(!string.IsNullOrEmpty(refFileName)) {
+                
+            //     var parts = refFileName.Split('-');
+            //     var className =  parts[0];
+            //     var methodsName =  parts[1];
+
+            //     var sample = Samples.FirstOrDefault(s => 
+            //                     s.ClassName == className
+            //                     && s.MethodName == methodsName);
+                
+            //     // try by method name
+            //     // SyntaxExtensionPrototype
+            //     if(sample == null) {
+            //         methodsName= parts.Last();
+
+            //         sample = Samples.FirstOrDefault(s => 
+            //                     s.MethodName == methodsName);
+            //     }
+
+            //     if(sample != null) {
+            //         var sampleContent = sample.MethodBody;
+
+
+            //         if(codeRef.GetAttribute("type") == "full") {
+            //             sampleContent = sample.MethodBodyWithFunction;
+            //         }
+
+            //         var sampleHtmlContent = String.Format("<pre><code>{0}</code></pre>", sampleContent);
+                    
+            //         outerHtml = outerHtml.Replace(codeRef.OuterHtml, sampleHtmlContent);
+			// 	}
+            // }
         }
 
         var outerHtmlBytes = System.Text.Encoding.UTF8.GetBytes(outerHtml);
@@ -237,17 +276,17 @@ public static class WyamHelper
 
         try
         {
-            Console.WriteLine("Parsing {0}", doc.Source);
-
             using (var stream = doc.GetStream())
             {
                 htmlDocument = parser.Parse(stream);
             }
         }
         catch(Exception e) {
-             Console.WriteLine("Exception while parsing HTML for {0}: {1}", doc.Source, e.Message);
-
-             return new [] { context.GetDocument(doc) };
+            var errorMessage = String.Format("Exception while parsing HTML for {0}: {1}", 
+                                                doc.Source, e.Message);
+            
+            Console.WriteLine(errorMessage);
+            throw new Exception(errorMessage);
         }
 
         ProcessHtmlImages(htmlDocument);
@@ -258,7 +297,6 @@ public static class WyamHelper
         var outerHtml =  htmlDocument.DocumentElement.OuterHtml;
         var outerHtmlBytes = System.Text.Encoding.UTF8.GetBytes(outerHtml);
 
-        //using(var memoryStream = new System.IO.MemoryStream(outerHtmlBytes)) {
         var memoryStream = new System.IO.MemoryStream(outerHtmlBytes);
         var newDoc = context.GetDocument(doc, memoryStream);
         
@@ -366,10 +404,265 @@ public static class WyamHelper
 	}
 }
 
+// classes
+
+public class NavigationServiceBase {
+        
+    protected List<IDocument> FindDocumentsForRelativeFolder(IEnumerable<IDocument> documents, string relativeFolderPath) 
+    {
+        return documents.Where(d => d.Get<String>("RelativeFileDir").ToUpper() == relativeFolderPath.ToUpper())
+                        .Where(d => !d.Get<String>("SourceFileName").StartsWith("_"))
+                        .Where(d => !d.Get<Boolean>("Hidden", false))
+                        .OrderBy(d => d.Get<int>("Order", 0))
+                        .ToList();
+    }     
+
+    protected IDocument GetDocumentByRelativeFilePath(IEnumerable<IDocument> documents, String relativePath) {
+        var doc = documents.FirstOrDefault(d => d.Get<String>("RelativeFilePath") == relativePath);
+        
+        if(doc == null) {
+            throw new Exception("Cannot find document by RelativeFilePath: " + relativePath);
+        }
+        
+        return doc;
+    }  
+
+    public static class Attributes {
+        public static string Navigation = "Docs.Navigation";
+    }
+}
+
+public class NavigationService : NavigationServiceBase
+{
+    public NavigationService() {
+
+    }
+
+    public NavigationService(IEnumerable<IDocument> documents) {
+        NavPaths = new Dictionary<string, NavigationNode>();
+        Documents = documents;
+        
+        Init();
+    }
+
+    public IEnumerable<IDocument> Documents { get; set; }
+    private Dictionary<string, NavigationNode> NavPaths;
+
+    private static NavigationService _instance;
+
+    public static NavigationService GetInstance(IEnumerable<IDocument> documents) {
+        if(_instance == null) {
+            _instance = new NavigationService(documents);
+        }
+
+        return _instance;
+    } 
+
+    private IEnumerable<IDocument> GetNavDocuments() {
+        return Documents.Where(d => d.Get(Attributes.Navigation, null) != null);
+    }
+
+    public void Init() {
+        ProcessNavigationDocuments();
+        ProcessNavigationLinks();        
+    }
+
+    protected void ProcessNavigationDocuments() {
+        var navDocuments = GetNavDocuments();
+
+        foreach(var navDocument in navDocuments) {
+            var navDir = navDocument.Get<String>("RelativeFileDir");
+
+            var topNavDocument = navDocument;
+            var topNavNode     = new NavigationNode(Documents, navDocument);
+
+            NavPaths.Add(navDir, topNavNode);
+        }
+    }
+
+    protected void ProcessNavigationLinks() {
+        foreach(var navPath in NavPaths.Keys) {
+                var rootNavNode  =  NavPaths[navPath];
+                var rootNavDocument = rootNavNode.Document;
+
+                var navData     = rootNavDocument.Get<IEnumerable<String>>(Attributes.Navigation, null);
+                var navLinkSets = GetNavLinks(navData);
+
+                foreach(var navLinkSet in navLinkSets) {
+                var topNavPath =  navLinkSet.First();
+
+
+                var topNavPaths = new []{ topNavPath };
+                var leftNavPaths = navLinkSet.Skip(1).ToList();
+
+                // if nothing specifically set, use the top nav folder
+                if(leftNavPaths.Count() == 0) {
+                    leftNavPaths.Add(topNavPath);
+                }
+                
+                // init top and left nav nodes
+                InitChildNodes(rootNavNode, topNavPaths, topNode => {
+                    InitChildNodes(topNode, leftNavPaths);
+                });
+            }
+        }
+    }
+
+    protected void InitChildNodes(NavigationNode parentNode, IEnumerable<string> navPaths) {
+        InitChildNodes(parentNode, navPaths, null);
+    }
+
+    protected void InitChildNodes(NavigationNode parentNode, IEnumerable<string> navPaths, Action<NavigationNode> action) {
+        foreach(var navPath in navPaths) {
+            var navDocument = GetDocumentByRelativeFilePath(Documents, navPath);
+            var navNode = new NavigationNode(Documents, navDocument);
+
+            parentNode.ChildNodes.Add(navNode);
+
+            if(action != null) {
+                action(navNode);
+            }
+        }
+    }
+
+    public IEnumerable<NavigationNode> GetLeftNavigationForDocument(IDocument document) {
+        var result = new List<NavigationNode>();
+
+        var topNavNode = GetActiveTopNavNode(document);
+
+        if(topNavNode != null) {
+            result.AddRange(topNavNode.ChildNodes);
+        }
+
+        return result;
+    }
+
+    public IEnumerable<NavigationNode> GetTopNavigationForDocument(IDocument document) {
+        var result = new List<NavigationNode>();
+        var topNavNode = FindTopNavigationNode(document);
+
+        if(topNavNode != null) {
+            result.AddRange(topNavNode.ChildNodes);
+        }
+
+        return result;
+    }
+
+    public NavigationNode GetActiveTopNavNode(IDocument document) {
+
+        var currentNavPath = document.Get<String>("RelativeFileDir");
+
+        var topNavNodes = GetTopNavigationForDocument(document)
+                                    .OrderByDescending(n => n.RelativeFileDir.Count());
+        
+        foreach(var topNavNode in topNavNodes) {
+            if(currentNavPath.StartsWith(topNavNode.RelativeFileDir)) {
+                return topNavNode;
+            }
+        }
+        
+        return null;                                         
+    }
+
+    public bool IsActiveTopNavigationNode(IDocument topNavDocument, IDocument document) {
+        var activeNode = GetActiveTopNavNode(document);
+        return (activeNode != null) && (activeNode.Document == topNavDocument);
+    }
+
+    public bool IsActiveLeftNavigationNode(IDocument leftNavDocument, IDocument document) {
+        return (leftNavDocument ==  document);
+    }
+
+    protected List<List<string>> GetNavLinks(IEnumerable<String> links) {
+        var result = new List<List<string>>();
+
+        var currentLinkList = new List<string>();
+        result.Add(currentLinkList);
+
+        foreach(var link in links) {
+            if(!String.IsNullOrEmpty(link)) {
+                currentLinkList.Add(link);
+            } else {
+                currentLinkList = new List<string>();
+                result.Add(currentLinkList);
+                continue;
+            }
+        }
+
+        return result; 
+    }
+
+    public NavigationNode FindTopNavigationNode(IDocument document) {
+        var relativePath = document.Get<String>("RelativeFileDir");
+        var parts = relativePath.Split('/').ToList();
+
+        for(var index = parts.Count(); index > 0; index--) {
+            var probePath = String.Join("/", parts.Take(index));
+
+            foreach(var navPath in NavPaths.Keys) {
+                if(navPath == probePath) {
+                    return NavPaths[navPath];
+                }
+            }
+        }
+
+        return null;
+    }
+}
+
+public class NavigationNode : NavigationServiceBase {
+    public NavigationNode() {
+        
+    }
+
+    public NavigationNode(IEnumerable<IDocument> documents, IDocument document) {
+        Documents = documents;
+        Document = document;
+        ChildNodes = new List<NavigationNode>();
+
+        Init();
+    }
+
+    public IEnumerable<IDocument> Documents { get; set; }
+    public IDocument Document { get; set; }
+
+    public void Init() {
+        
+    }
+
+    public string RelativeFileDir { 
+        get {
+            return Document.Get<String>("RelativeFileDir");
+        }
+    }
+
+    public List<NavigationNode> GetSiblingNodes() {
+        var result = new List<NavigationNode> ();
+
+        var siblingDocs =  FindDocumentsForRelativeFolder(Documents, RelativeFileDir)
+                                .OrderBy(d => (string)d.Get("Title", d.Get("SourceFileName").ToString() ) )
+                                .ThenBy(d => (int)d.Get("Order", 0));
+
+        foreach(var doc in siblingDocs) {
+            result.Add(new NavigationNode(Documents,doc));
+        }
+
+        return result;
+    }
+
+    public List<NavigationNode> ChildNodes { get; set; }
+}
+
+// classed end
+
 Pipelines.Add("markdown",
     ReadFiles("**/*.md"),
     FrontMatter(Yaml()),
-    Markdown().UseExtensions().EscapeAt(),
+    FileName("FileName")
+        .WithAllowedCharacters(new[] {".", "-"}),
+    Markdown()
+        .UseExtensions()
+        .EscapeAt(),
     Replace("@", "&#64;"),
     Execute( (doc, context) => { 
         return WyamHelper.ProcessSampleReferencies(doc, context);
