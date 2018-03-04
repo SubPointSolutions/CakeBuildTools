@@ -52,7 +52,7 @@
   "customNuspecs": [
     {
       "Id": "SubPointSolutions.CakeBuildTools",
-      "Version": "0.2.0-beta1",
+      "Version": "0.2.0-beta3",
       "Dependencies": [ ],
       "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
       "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
@@ -67,7 +67,9 @@
         {
           "Target": "scripts",
           "TargetFiles": [
-            "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake"
+            "bin/debug/scripts/SubPointSolutions.CakeBuild.Core.cake",
+            "bin/debug/scripts/SubPointSolutions.CakeBuild.Docs.cake",
+            "bin/debug/scripts/SubPointSolutions.CakeBuild.Wyam.cake"
           ]
         }
       ]

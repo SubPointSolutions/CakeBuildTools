@@ -154,7 +154,9 @@
     <None Include="build.cake" />
     <None Include="build.json" />
     <None Include="build.ps1" />
-    <None Include="Scripts\SubPointSolutions.CakeBuild.DocIndex.cake" />
+    <None Include="Scripts\SubPointSolutions.CakeBuild.Docs.cake">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Scripts\SubPointSolutions.CakeBuild.Wyam.cake">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
