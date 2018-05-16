@@ -5,7 +5,7 @@
     "defaultChocolateyPackagesDirectory": "./build-artifact-cli-packages",
     "defaultNuspecVersion": "0.1.0",
 
-    "defaultDocsBuildEnabled": true,
+    "defaultDocsBuildEnabled": false,
     "defaultDocsViewFolder": "docs/input",
     "defaultDocsSamplesFolder": "",
     "defaultDocsRepoFolder": "sps-cakebuildtools",
