@@ -1,0 +1,87 @@
+
+@foreach(var tileGroup in WyamHelper.GetProjectCategories(Documents)) {
+
+    <div class="row">
+        <div class="col-md-4 d-project-category-container">
+            <h4>
+                @tileGroup
+            </h4>
+        </div>    
+        
+    </div>
+
+    <div class="row">
+        @foreach(var project in WyamHelper.GetProjectsForCategory(Documents, tileGroup)) {
+            var projectTitle       = project.Get<String>(WyamHelper.Attributes.ProjectTitle);
+            var projectDescription       = project.Get<String>(WyamHelper.Attributes.ProjectDescription);
+            var projectRelativeDir = project.Get<String>("RelativeFileDir");
+
+            var projectLinks       =  WyamHelper.GetProjectLinksForDir(Documents, projectRelativeDir);
+
+            var firstLinks  = projectLinks.Take(3).ToList();
+            var secondLinks = new List<IDocument>();
+
+            if(projectLinks.Count() > 3) {
+                secondLinks = projectLinks.Skip(3).Take(3).ToList();
+            }
+
+            <div class="col-md-4 d-project-container">
+                <div class="card d-project-card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @projectTitle
+                        </h5>
+                        <p class="card-text">
+                            @projectDescription
+                        </p>
+                        
+                            @if(firstLinks.Any()) {
+                                <div class='d-project-link-container'>
+                                    <table class="table">
+                                        <tr>
+                                            <td>
+                                                <ul>
+                                                    @foreach(var projectLink in firstLinks) {
+                                                        var url = WyamHelper.GetUrl(projectLink);
+                                                        var linkTitle = projectLink.Get<String>("Title");
+                                                        var resultTitle = projectLink.Get<String>("Project.LinkTitle", linkTitle);
+
+                                                        <li>
+                                                            <a href="@url">
+                                                                @resultTitle
+                                                            </a>                                
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                @if(secondLinks.Any()) {
+                                                    foreach(var projectLink in secondLinks) {
+                                                        var url = WyamHelper.GetUrl(projectLink);
+                                                        var linkTitle = projectLink.Get<String>("Title");
+                                                        var resultTitle = projectLink.Get<String>("Project.LinkTitle", linkTitle);
+
+                                                        <li>
+                                                            <a href="@url">
+                                                                @resultTitle
+                                                            </a>                                
+                                                        </li>
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>                            
+                            }
+                        
+
+
+                        
+                    </div>
+                </div>
+
+                
+            </div>
+        }
+    </div>
+}

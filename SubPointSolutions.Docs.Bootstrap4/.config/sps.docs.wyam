@@ -1,0 +1,404 @@
+﻿#n Wyam.Markdown
+#n Wyam.Razor
+#n Wyam.Yaml
+#n Wyam.Html 
+#n Wyam.Sass
+
+#n Microsoft.CSharp
+#n System.Xml
+#n System.Xml.Linq
+
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture
+    = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
+
+Settings["subpoint.env"] = Environment.GetEnvironmentVariable("ci.env") ?? "local";
+
+Console.WriteLine(String.Format("{0}, v{1}", 
+	WyamHelper.GetThemeName(), 
+	WyamHelper.GetThemeVersion()  
+));
+
+Console.WriteLine("Running Wyam for env: " + Settings["subpoint.env"]);
+
+public static class WyamHelper
+{
+    public static class Attributes {
+
+        public static string Title                = "Title";
+        public static string Description          = "Description";
+        public static string Order                = "Order";
+
+        public static string NavTopNodeTitle      = "Nav.TopNodeTitle";
+        public static string NavTopNodeOrder      = "Nav.TopNodeOrder";
+
+        public static string NavLeftTitle         = "Nav.LeftNodeTitle";
+        public static string NavLeftNodeOrder     = "Nav.LeftNodeOrder";
+        public static string NavLeftNodeFolders   = "Nav.LeftNodeFolders";
+
+        public static string ProjectTitle         = "Project.Title";
+        public static string ProjectDescription   = "Project.Description";
+        public static string ProjectCategory      = "Project.Category";
+        public static string ProjectCategoryOrder = "Project.CategoryOrder";
+
+        public static string ProjectLinkTitle     = "Project.LinkTitle";
+        public static string ProjectLinkOrder     = "Project.LinkOrder";
+    }
+
+	public static string GetThemeName() {
+		return "SubPointSolutions.Docs.Bootstrap4";
+	}
+
+	public static string GetThemeVersion() {
+		return "0.2.2";
+	}
+
+	public static string GetThemeUrl() {
+		return @"https://github.com/SubPointSolutions/CakeBuildTools";
+	}
+
+    public static bool IsLocalRun() {
+        return System.Environment.GetEnvironmentVariable("ci.env") != "prod";
+    }
+
+    public static bool HasAttribute(IDocument document, string attributeName) {
+        return document.ContainsKey(attributeName)
+                && document[attributeName] != null;
+    }
+
+    public static bool HasNonEmptyAttribute(IDocument document, string attributeName) {
+        return HasAttribute(document, attributeName)
+                && !String.IsNullOrEmpty(document[attributeName].ToString());
+    }
+
+    public static bool HasNonEmptyAttributes(IDocument document, IEnumerable<string> attributeNames) {
+        
+        var result = true;
+
+        foreach(var attributeName in attributeNames) {
+            result = HasNonEmptyAttribute(document, attributeName);
+
+            if(!result) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    public static List<IDocument> GetProjects(IEnumerable<IDocument> documents) {
+        var result = documents
+                .Where(x => HasNonEmptyAttributes(x, new []{
+                    Attributes.ProjectTitle,
+                    Attributes.ProjectDescription,
+                    Attributes.ProjectCategory,
+                    Attributes.ProjectCategoryOrder
+                })) 
+            .OrderBy(x => x.Get<int>(Attributes.ProjectCategoryOrder, 0))
+            .ToList();
+
+        return result;
+    }
+
+    public static List<string> GetProjectCategories(IEnumerable<IDocument> documents) {
+        var projects = GetProjects(documents);
+
+        var result = projects
+                .GroupBy(tile => tile.Get<String>(Attributes.ProjectCategory, "unknown category"))
+                .Select(g => g.Key)
+                .ToList();   
+
+        return result;
+    }
+
+    public static List<IDocument> GetProjectLinks(IEnumerable<IDocument> documents) {
+        var tiles = documents
+                .Where(x => HasNonEmptyAttributes(x, new []{
+                    Attributes.ProjectLinkTitle,
+                    Attributes.ProjectLinkOrder
+                })) 
+         .OrderBy(x => x.Get<int>(Attributes.ProjectLinkOrder, 0))
+         .ToList();
+
+         return tiles;
+    }
+
+    public static List<IDocument> GetProjectsForCategory(IEnumerable<IDocument> documents, string category) {
+        var tiles = WyamHelper.GetProjects(documents)
+                        .Where(t => t.Get<String>(Attributes.ProjectCategory, "unknown category") == category)
+                        .OrderBy(t => t.Get<int>(Attributes.ProjectCategoryOrder, 0))
+                        .ToList();
+                            
+        return tiles;
+    }
+
+    public static List<IDocument> GetProjectLinksForDir(IEnumerable<IDocument> documents, string relativeFileDir) {
+        var tileLinks = GetProjectLinks(documents)
+                        .Where(t => (t.Get<String>("RelativeFileDir") + "/").StartsWith(relativeFileDir + "/"))
+                        .ToList();
+                            
+        return tileLinks;
+    }
+
+    public static string GetUrl(IDocument document) {
+        var path = document.Get<String>("RelativeFileDir");
+
+        var fileName = document.Get<String>("SourceFileBase");
+        var writeFileName = document.Get<String>("WriteFileName");
+
+        if(String.IsNullOrEmpty(writeFileName)) {
+            return String.Format("/{0}/{1}.html", path, fileName);
+        } 
+
+        return String.Format("/{0}/{1}", path, writeFileName);
+    }   
+
+    public static void ProcessHtmlBlockquotes(AngleSharp.Dom.Html.IHtmlDocument htmlDocument) {
+
+        var elements = htmlDocument.QuerySelectorAll("blockquote")
+                                .ToArray();
+
+        foreach (var element in elements)
+        {
+            var content = element.InnerHtml;
+
+            if (content == null)
+                content = string.Empty;
+            else
+                content = content.Trim();
+
+            var contentHasParagraph = content.StartsWith("<p>");
+
+            var callout = htmlDocument.CreateElement("div");
+
+            callout.SetAttribute("class", "blockquote d-blockquote d-blockquote-info");
+            callout.InnerHtml = contentHasParagraph
+                                    ? content
+                                    : string.Format("<p>{0}</p>", content);
+
+            element.Replace(callout);
+        }
+	}
+
+    public static IDocument[] ProcessSampleReferencies(IDocument doc, IExecutionContext context) {
+        var result = new List<IDocument>();
+
+        AngleSharp.Parser.Html.HtmlParser parser = new AngleSharp.Parser.Html.HtmlParser();
+		AngleSharp.Dom.Html.IHtmlDocument htmlDocument = null;
+
+        try
+        {
+            Console.WriteLine("Parsing {0}", doc.Source);
+
+            using (var stream = doc.GetStream())
+            {
+                htmlDocument = parser.Parse(stream);
+            }
+        }
+        catch(Exception e) {
+             Console.WriteLine("Exception while parsing HTML for {0}: {1}", doc.Source, e.Message);
+
+             return new [] { context.GetDocument(doc) };
+        }
+
+        var outerHtml = htmlDocument.DocumentElement.OuterHtml;
+        var refs = htmlDocument.QuerySelectorAll("a[href^='_samples']").ToArray();
+       
+        foreach (var codeRef in refs) {
+            var refFileName = System.IO.Path.GetFileNameWithoutExtension(codeRef.GetAttribute("href"));
+
+            if(!string.IsNullOrEmpty(refFileName)) {
+                var sample = "hahaha!";
+
+				if(sample != null) {
+                    var sampleContent = "sh my.sh";
+                    var sampleHtmlContent = String.Format("<pre><code>{0}</code></pre>", sampleContent);
+                    
+                    outerHtml = outerHtml.Replace(codeRef.OuterHtml, sampleHtmlContent);
+				}
+            }
+        }
+
+        var outerHtmlBytes = System.Text.Encoding.UTF8.GetBytes(outerHtml);
+
+        var memoryStream = new System.IO.MemoryStream(outerHtmlBytes);
+        var newDoc = context.GetDocument(doc, memoryStream);
+        
+        result.Add(newDoc);
+
+        return result.ToArray();
+    }
+
+    public static IDocument[] ProcessHtmlContent(IDocument doc, IExecutionContext context)
+    {
+        var result = new List<IDocument>();
+
+        AngleSharp.Parser.Html.HtmlParser parser = new AngleSharp.Parser.Html.HtmlParser();
+		AngleSharp.Dom.Html.IHtmlDocument htmlDocument = null;
+
+        try
+        {
+            Console.WriteLine("Parsing {0}", doc.Source);
+
+            using (var stream = doc.GetStream())
+            {
+                htmlDocument = parser.Parse(stream);
+            }
+        }
+        catch(Exception e) {
+             Console.WriteLine("Exception while parsing HTML for {0}: {1}", doc.Source, e.Message);
+
+             return new [] { context.GetDocument(doc) };
+        }
+
+        ProcessHtmlImages(htmlDocument);
+        ProcessHtmlLinks(htmlDocument);
+        ProcessHtmlBlockquotes(htmlDocument);
+        ProcessPreHtmlTag(htmlDocument);
+
+        var outerHtml =  htmlDocument.DocumentElement.OuterHtml;
+        var outerHtmlBytes = System.Text.Encoding.UTF8.GetBytes(outerHtml);
+
+        //using(var memoryStream = new System.IO.MemoryStream(outerHtmlBytes)) {
+        var memoryStream = new System.IO.MemoryStream(outerHtmlBytes);
+        var newDoc = context.GetDocument(doc, memoryStream);
+        
+        result.Add(newDoc);
+
+        return result.ToArray();
+    }
+
+    public static void ProcessHtmlLinks(AngleSharp.Dom.Html.IHtmlDocument htmlDocument) {
+
+        var elements = htmlDocument.QuerySelectorAll("a")
+                                .ToList();
+
+		elements.AddRange(htmlDocument.QuerySelectorAll("link").ToList());
+
+            foreach (var element in elements)
+            {
+                var href = element.GetAttribute("href");
+
+                if (href == null)
+                    continue;
+                
+				// internal link
+                if (href.StartsWith("/"))
+                {
+					href = href.ToLower();
+
+					if(href.EndsWith("/index"))
+						href = href.Replace("/index", String.Empty);
+
+					element.SetAttribute("href", href);
+
+				} else if(href.StartsWith("http")) {
+					
+					element.SetAttribute("href", href.ToLower());
+					element.SetAttribute("target", "_blank");
+				}
+            }
+
+			// scipts
+			var scripts = htmlDocument.QuerySelectorAll("script")
+                                   .ToList();
+
+			scripts.AddRange(htmlDocument.QuerySelectorAll("img").ToList());
+
+            foreach (var element in scripts)
+            {
+                var href = element.GetAttribute("src");
+
+                if (href == null)
+                    continue;
+                
+				// internal link
+                if (href.StartsWith("/"))
+                {
+					href = href.ToLower();
+
+					element.SetAttribute("src", href);
+
+				} else if(href.StartsWith("http")) {
+					
+					element.SetAttribute("src", href.ToLower());
+				}
+            }
+	}
+
+    public static void ProcessPreHtmlTag(AngleSharp.Dom.Html.IHtmlDocument htmlDocument) {
+        var elements = htmlDocument.QuerySelectorAll("pre").ToArray();
+
+		foreach (var element in elements) {
+			var classValue = element.GetAttribute("class");
+
+			element.SetAttribute("class", classValue + " prettyprint");
+		}
+    }    
+
+    public static void ProcessHtmlImages(AngleSharp.Dom.Html.IHtmlDocument htmlDocument) {
+
+		var images = htmlDocument.QuerySelectorAll("img").ToArray();
+
+		var targetAttValues = new string[] {
+			"d-image"
+		};
+
+		foreach (var image in images) {
+
+			var attValue = image.GetAttribute("class");
+			var srcValue = image.GetAttribute("src");
+			
+			if(attValue == null)	
+				attValue = string.Empty;
+			else
+				attValue = attValue.ToLower();
+
+			foreach(var targetAttrValue in targetAttValues) {
+				
+				if(!attValue.Contains(targetAttrValue.ToLower())) {
+					attValue += " " + targetAttrValue.ToLower();
+				}
+			}
+
+			image.SetAttribute("class", attValue);
+			image.SetAttribute("src", string.IsNullOrEmpty(srcValue) ? "" : srcValue.ToLower() );
+		}
+	}
+}
+
+Pipelines.Add("markdown",
+    ReadFiles("**/*.md"),
+    FrontMatter(Yaml()),
+    Markdown().UseExtensions().EscapeAt(),
+    Replace("@", "&#64;"),
+    Execute( (doc, context) => { 
+        return WyamHelper.ProcessSampleReferencies(doc, context);
+    }),
+    Execute( (doc, context) => { 
+        return WyamHelper.ProcessHtmlContent(doc, context);
+    }),
+    Replace("@", "&#64;"),
+    Razor(),
+    Replace("&#64;", "@"),
+    WriteFiles(".html")
+);
+
+Pipelines.Add("css",
+    ReadFiles("css/*.css"),
+    WriteFiles(".css").UseWriteMetadata(false)
+);
+
+Pipelines.Add("js",
+    ReadFiles("js/**.js"),
+    WriteFiles(".js")
+);
+
+Pipelines.Add("resources",
+	CopyFiles("**/*{!.cshtml,!.md,!.yaml,}")
+);
+
+Pipelines.Add("sass",
+    ReadFiles("**/*.scss"),
+    Sass().WithCompactOutputStyle(),
+    WriteFiles(".css").UseWriteMetadata(false)
+);
