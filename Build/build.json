@@ -38,7 +38,7 @@
     "customNuspecs": [
       {
         "Id": "SubPointSolutions.CakeBuildTools",
-        "Version": "0.1.1-beta8",
+        "Version": "0.1.1-beta14",
         "Dependencies": [ ],
         "LicenseUrl": "https://github.com/SubPointSolutions/CakeBuildTools/licence",
         "ProjectUrl": "https://github.com/SubPointSolutions/CakeBuildTools",
