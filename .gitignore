@@ -154,3 +154,10 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+
+packages
+.vs
+/SubPointSolutions.CakeBuildTools/packages.config
+/SubPointSolutions.CakeBuildTools/app.config
+
+.vs
