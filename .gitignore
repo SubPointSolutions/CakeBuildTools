@@ -159,3 +159,5 @@ packages
 .vs
 /SubPointSolutions.CakeBuildTools/packages.config
 /SubPointSolutions.CakeBuildTools/app.config
+
+.vs

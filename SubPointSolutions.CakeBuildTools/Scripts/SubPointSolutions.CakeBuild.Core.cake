@@ -1,32 +1,15 @@
-// common tooling
-// always version to avoid breaking change with new releases
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell
-#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json
-#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Figlet
-#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy
+// locks on versions so that it won't break with new releases
 
-#tool nuget:https://www.nuget.org/api/v2/?package=Octokit&Version=0.29.0
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Razor&Version=3.2.6
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.AspNet.Mvc&Version=5.2.6
-#tool nuget:https://www.nuget.org/api/v2/?package=RazorEngine&Version=3.10.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.Powershell&Version=0.4.7
+#addin nuget:https://www.nuget.org/api/v2/?package=newtonsoft.json&Version=12.0.1
+#addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.14.0
+#addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy&Version=0.3.3
 
-#tool nuget:https://www.nuget.org/api/v2/?package=Microsoft.Net.Http&Version=2.2.29
-
-#reference "tools/Octokit.0.29.0/lib/net45/Octokit.dll"
-#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.dll"
-#reference "tools/Microsoft.Net.Http.2.2.29/lib/net40/System.Net.Http.WebRequest.dll"
-
-#reference "tools/Microsoft.AspNet.Razor.3.2.3/lib/net45/System.Web.Razor.dll"
-#reference "tools/RazorEngine.3.10.0/lib/net45/RazorEngine.dll"
-
-var version = "0.1.0-beta14";
+var version = "0.2.0-beta1";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
 Setup(ctx => {
-	Information(Figlet("SubPointSolutions'"));
-    	Information(Figlet("CakeBuildTools"));
 	Information("Running SubPointSolutions.CakeBuildTools: " + version);
 });
 
@@ -53,335 +36,6 @@ string GetGlobalEnvironmentVariable(string name) {
     return result;
 }
 
-public class Release
-    {
-        public Release()
-        {
-            ReleaseIssueGroups = new List<ReleaseIssueGroup>();
-        }
-
-        public string ReleaseTitle { get; set; }
-        public string ReleaseVersion { get; set; }
-        public string ReleaseMonth { get; set; }
-
-        public string ReleaseSummary { get; set; }
-
-        public List<ReleaseIssueGroup> ReleaseIssueGroups { get; set; }
-
-
-        public string RegressionTestNotes { get; set; }
-
-        public string AssemblyFileVersion { get; set; }
-
-        public ReleaseIssue TmpIssue { get; set; }
-        public string ReleaseMonthAndYear { get; set; }
-
-        public string ProjectName {get;set;}
-        public string CompanyName {get;set;}
-    }
-
-public class ReleaseIssueGroup
-    {
-        public ReleaseIssueGroup()
-        {
-            Issues = new List<ReleaseIssue>();
-        }
-
-        public string Label { get; set; }
-        public string LabelTitle { get; set; }
-
-        public List<ReleaseIssue> Issues { get; set; }
-    }
-
-    public class ReleaseIssue
-    {
-        public string Title { get; set; }
-        public int Number { get; set; }
-        public string Url { get; set; }
-    }
-
-public class GiHubService {
-
- public GiHubService() {
-
-     AppName = "SubPointSolutions.CakeBuildTools";
- }
-
-    public string AppName { get; set; }
-
-        public string UserName { get; set; }
-        public string UserPassword { get; set; }
-
-        protected Octokit.GitHubClient GClient { get; set; }
-
- public void EnsurePreRelease(
-            string repositoryOwner, 
-            string repositoryName,
-            string releaseTag,
-            string branchName,
-            string releaseName,
-            string releaseContent,
-            bool publish)
-        {
-            var isDraft = !publish;
-
-            WithG(client =>
-            {
-                var allReleases = client.Repository.Release.GetAll(repositoryOwner, repositoryName).Result;
-                var existingRelease = allReleases.FirstOrDefault(r => r.Name == releaseName);
-
-                if (existingRelease == null)
-                {
-                    var release = client.Repository.Release.Create(repositoryOwner, repositoryName, new Octokit.NewRelease(releaseTag)
-                    {
-                        Draft = isDraft,
-                        Name = releaseName,
-                        TargetCommitish = branchName,
-                        Body = releaseContent
-                    }).Result;
-                }
-                else
-                {
-                    var updatableRelease = existingRelease.ToUpdate();
-
-                    updatableRelease.TagName = releaseTag;
-                    updatableRelease.TargetCommitish = branchName;
-
-                    updatableRelease.Body = releaseContent;
-                    updatableRelease.Draft = isDraft;
-
-                    var tmp = client.Repository.Release.Edit(repositoryOwner, repositoryName, existingRelease.Id, updatableRelease).Result;
-                }
-            });
-        }
-
-     protected virtual void InitGClient()
-        {
-            if (GClient == null)
-                GClient = new Octokit.GitHubClient(new Octokit.ProductHeaderValue(AppName));
-
-                var basicAuth = new Octokit.Credentials(UserName, UserPassword);
-                GClient.Credentials = basicAuth;
-        }
-
-        protected virtual void WithG(Action<Octokit.GitHubClient> action)
-        {
-            InitGClient();
-
-            action(GClient);
-        }
-
-
-    public List<Octokit.Issue> GetClosedIssuesInOpenedMilistones(string company, string repo)
-        {
-            return GetClosedIssuesInOpenedMilistones(company, repo, DateTimeOffset.Now.AddDays(8).DateTime);
-        }
-
-        public List<Octokit.Issue> GetClosedIssuesInOpenedMilistones(string company, string repo, DateTimeOffset nowDate)
-        {
-            var result = new List<Octokit.Issue>();
-
-            WithG(client =>
-            {
-                var allMilestones = client.Issue.Milestone
-                                      .GetAllForRepository(company, repo, new Octokit.MilestoneRequest
-                                      {
-                                          State = Octokit.ItemStateFilter.Open
-                                      })
-                                      .Result;
-
-                var activeMilestones = allMilestones.Where(m => !m.ClosedAt.HasValue && m.DueOn <= nowDate)
-                                                    .OrderBy(m => m.DueOn);
-
-                var allClosedIssues = client.Issue.GetAllForRepository(company, repo, new Octokit.RepositoryIssueRequest
-                {
-                    State = Octokit.ItemStateFilter.Closed
-                }).Result.ToList();
-
-                foreach (var milestone in activeMilestones)
-                {
-                    foreach (var issue in allClosedIssues)
-                    {
-                        if (issue.Milestone != null &&
-                            issue.Milestone.Title == milestone.Title)
-                        {
-                            if (issue.ClosedAt.HasValue)
-                            {
-                                result.Add(issue);
-                            }
-                        }
-                    }
-                }
-            });
-
-            return result;
-        }
-
-}
-
-string CreateGitHubReleaseNotes(
-        string githubCompanyName,
-        string githubRepositoryName,
-
-        string githubUserName,
-        string githubUserPassword,
-
-        string releaseTitle,
-        string releaseVersion,
-
-        string releaseAssemblyFileVersion,
-        string releaseTemplateFileName,
-        string releaseLabels
-        
-        ) {
-
-            var useCache = false;
-            var cacheFile = "release-cake.cache";
-
-            var releaseData = new Release();
-
-            releaseData.CompanyName = githubCompanyName;
-            releaseData.ProjectName = releaseTitle;
-            
-            var githubAppName = "SubPointSolutions.CakeBuildTools";
-
-            // var releaseLabels = string.Join(";", new string[]
-            // {
-            //     "new definition,New Definition",
-            //     "bug,Fixes",
-            //     "enhancement,Enhancements",
-            //     "wontfix,"
-            // });
-
-            Information("Creating GitHub service...");
-
-            var githubService = new GiHubService();
-
-            githubService.AppName = githubAppName;
-
-            githubService.UserName = githubUserName;
-            githubService.UserPassword = githubUserPassword;
-
-            if (System.IO.File.Exists(cacheFile) && useCache)
-            {
-                //releaseData = XmlSerializerUtils.DeserializeFromString<Release>(System.IO.File.ReadAllText(cacheFile));
-            }
-            else
-            {
-                var allowedIssueGroupLabels = releaseLabels.Split(';').Select(l => l.Split(',')[0]).ToList();
-                var allowedIssueGroupLabelTitles = releaseLabels.Split(';').Select(l => l.Split(',')[1]).ToList();
-
-                Information("Fetching closed issues...");
-
-                var issues = new List<Octokit.Issue>();
-                issues.AddRange(githubService.GetClosedIssuesInOpenedMilistones(githubCompanyName, githubRepositoryName));
-                issues = issues.OrderByDescending(i => i.Number).ToList();
-
-                foreach (var issue in issues)
-                {
-                    if (!issue.Labels.Any(l => allowedIssueGroupLabels.Contains(l.Name)))
-                    {
-                        throw new Exception(string.Format(
-                            "Issue #{0} [{1}] [{2}] should have one of the following tags:[{3}]",
-                            new object[] {
-                            issue.Id, issue.Title, issue.Url,
-                            string.Join(",", allowedIssueGroupLabels.ToArray()) }));
-                    }
-                }
-
-                Information("Creating release groups...");
-                var releaseIssueGroups = new List<ReleaseIssueGroup>();
-
-                var index = 0;
-
-                foreach (var allowedIssueLabel in allowedIssueGroupLabels)
-                {
-                    var issueGroupTitle = allowedIssueGroupLabelTitles[index++];
-
-                    if (string.IsNullOrEmpty(issueGroupTitle))
-                        continue;
-
-                    releaseIssueGroups.Add(new ReleaseIssueGroup
-                    {
-                        Label = allowedIssueLabel,
-                        LabelTitle = issueGroupTitle,
-                        Issues = issues.Where(i => i.Labels.Any(l => l.Name == allowedIssueLabel))
-                     .Select(i => new ReleaseIssue
-                     {
-                         Title = i.Title,
-                         Url = string.Format("https://github.com/{0}/{1}/issues/{2}",
-                                                githubCompanyName,
-                                                githubRepositoryName,
-                                                i.Number),
-                         Number = i.Number
-                     }).ToList()
-                    });
-                }
-
-                releaseData.ReleaseIssueGroups = releaseIssueGroups;
-
-                //var cache = XmlSerializerUtils.SerializeToString(releaseData);
-                //System.IO.File.WriteAllText(cacheFile, cache);
-            }
-
-            Information("Filling release metadata...");
-            releaseData.ReleaseMonthAndYear = string.Format("{0} {1}",
-                                                DateTime.Now.ToString("MMMM"),
-                                                DateTime.Now.Year);
-
-            releaseData.ReleaseTitle = string.Format("{0}", releaseTitle);
-            releaseData.ReleaseVersion = releaseVersion;
-            releaseData.AssemblyFileVersion = releaseAssemblyFileVersion;
-
-            Information("Fetching release notes template file:" + releaseTemplateFileName);
-            var templateContent = System.IO.File.ReadAllText(releaseTemplateFileName);
-
-            Information("Generating release notes...");
-
-			var templateConfig = new RazorEngine.Configuration.TemplateServiceConfiguration();
-			templateConfig.DisableTempFileLocking = true;
-			templateConfig.CachingProvider = new RazorEngine.Templating.DefaultCachingProvider(t => {}); //disables the warnings
-
-			var razorEngine = RazorEngine.Templating.RazorEngineService.Create(templateConfig);
-
-            var result = RazorEngine.Templating.RazorEngineServiceExtensions.RunCompile(razorEngine, templateContent, "templateKey", null, releaseData);
-
-            var releaseNotes = result;
-            var fileName = string.Format("release-notes-{0}.md", releaseVersion);
-
-            Information("Saving release notes to file: " + fileName);
-            System.IO.File.WriteAllText(fileName, releaseNotes);
-
-            
-
-            var githubReleaseNotesBranch = ciBranch == "master" ? "master" : "beta";
-            var githubReleaseNotesTitle = string.Format("{0} {1}, {2}", releaseTitle, releaseVersion, releaseData.ReleaseMonthAndYear);
-
-            Information("Updating GitHub pre-release:" + githubReleaseNotesTitle);
-
-            Verbose("   -githubCompanyName:" + githubCompanyName);
-            Verbose("   -githubRepositoryName:" + githubRepositoryName);
-            Verbose("   -releaseVersion:" + releaseVersion);
-            Verbose("   -githubReleaseNotesBranch:" + githubReleaseNotesBranch);
-            Verbose("   -releaseVersion:" + releaseVersion);
-
-            if(ciGitHubShouldPublish) {
-                Information("[!] Release will be published:" + githubReleaseNotesTitle);
-            } else {
-                Information("Release in draft:" + githubReleaseNotesTitle);
-            }
-
-            githubService.EnsurePreRelease(
-                        githubCompanyName,
-                        githubRepositoryName,
-                        releaseVersion,
-                        githubReleaseNotesBranch,
-                        githubReleaseNotesTitle,
-                        releaseNotes,
-                        ciGitHubShouldPublish);
-
-            return fileName;
-}
 
 string GetVersionForNuGetPackage(string id) {
     return GetVersionForNuGetPackage(id, ciBranch);
@@ -468,7 +122,7 @@ string GetVersionForNuGetPackage(string id, string branch) {
             Information(String.Format("- currentVersion package [{0}] version [{1}]", id, resultVersion));
          }; break;
 
-         // master always buils the major version removing '-beta' postfix
+         // master always builds the major version removing '-beta' postfix
          // - package.0.1.0
          // - package.0.1.1 and so on
          case "master" : {
@@ -885,7 +539,6 @@ var ciNuGetKey = GetGlobalEnvironmentVariable("ci.nuget.key") ?? String.Empty;
 var ciNuGetShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.nuget.shouldpublish") ?? "FALSE");
 var ciChocolateyShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.chocolatey.shouldpublish") ?? "FALSE");
 var ciWebDeployShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.webdeploy.shouldpublish") ?? "FALSE");
-var ciGitHubShouldPublish = bool.Parse(GetGlobalEnvironmentVariable("ci.github.shouldpublish") ?? "FALSE");
 
 // source solution dir and file
 var defaultSolutionDirectory =  GetFullPath((string)jsonConfig["defaultSolutionDirectory"]); 
@@ -1413,268 +1066,6 @@ var defaultActionCLIZipPackaging = Task("Action-CLI-Zip-Packaging")
     
 });
 
-var defaultActionDocsMerge = Task("Action-Docs-Merge")
-    .Does(() =>
-{
-    Information("Building documentation merge...");
-
-	if(jsonConfig["defaultDocsBuildEnabled"] == null || ((bool)jsonConfig["defaultDocsBuildEnabled"]) == false) {
-		 Information(String.Format("defaultDocsBuildEnabled is null. No docs merge will be done."));
- 		 return;
-	}
-
-    var defaultDocsViewFolder = (string)jsonConfig["defaultDocsViewFolder"];
-    if(String.IsNullOrEmpty(defaultDocsViewFolder))
-        throw new Exception("defaultDocsViewFolder is null or empty. Update json config");
-
-    var defaultDocsRepoFolder = (string)jsonConfig["defaultDocsRepoFolder"];
-    if(String.IsNullOrEmpty(defaultDocsRepoFolder))
-        throw new Exception("defaultDocsRepoFolder is null or empty. Update json config");
-
-    var srcDocsPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(defaultSolutionDirectory,defaultDocsViewFolder ));
-    Information(String.Format("Merging from folder [{0}]", srcDocsPath));
-
-    if(!System.IO.Directory.Exists(srcDocsPath))
-        throw new Exception(String.Format("Directory does not exist - [{0}]", srcDocsPath));
-
-    var defaultDocsBranch = (string)jsonConfig["defaultDocsBranch"];
-    if(String.IsNullOrEmpty(defaultDocsBranch))
-        throw new Exception("defaultDocsBranch is null or empty. Update json config");
-
-    var defaultDocsFileExtensions = jsonConfig["defaultDocsFileExtensions"]
-                                        .Select(f => (string)f)
-                                        .ToList().OrderBy(a => a);
-
-    if(defaultDocsFileExtensions.Count() == 0)
-        throw new Exception("defaultDocsFileExtensions is null or empty. Update json config with array of extensions to be added to docs");
-
-        // because of some long names files - always in the root
-     var tmpDocsFolder = System.IO.Path.Combine("c:/","__sps_docs");
-
-    var docsRepoFolder = System.IO.Path.GetFullPath(string.Format(@"{0}/{1}",  tmpDocsFolder, defaultDocsRepoFolder));
-    var docsRepoUrl = @"https://github.com/SubPointSolutions/subpointsolutions-docs";
-
-    var dstDocsPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs/Views", docsRepoFolder);
-	var dstDocsSamplesPath = string.Format(@"{0}/subpointsolutions-docs/SubPointSolutions.Docs", docsRepoFolder);
-
-    var docsEnvironmentVars = new [] {
-        "ci.docs.username",
-        "ci.docs.userpassword",
-    };
-
-    foreach(var name in docsEnvironmentVars)
-    {
-        Information(string.Format("HasEnvironmentVariable - [{0}]", name));
-
-        var value = GetGlobalEnvironmentVariable(name);
-        
-        if(String.IsNullOrEmpty(value)) {
-            Information(string.Format("Cannot find environment variable:[{0}]", name));
-            throw new ArgumentException(string.Format("Cannot find environment variable:[{0}]", name));
-        }
-    }
-
-     var docsRepoUserName = GetGlobalEnvironmentVariable("ci.docs.username");
-	 var docsRepoUserPassword = GetGlobalEnvironmentVariable("ci.docs.userpassword");
-     var docsRepoPushUrl = string.Format(@"https://{0}:{1}@github.com/SubPointSolutions/subpointsolutions-docs", docsRepoUserName, docsRepoUserPassword);
-
-     var commitName = string.Format(@"MetaPack - CI docs merge {0}", DateTime.Now.ToString("yyyyMMdd_HHmmssfff"));
-
-     Information(string.Format("Merging documentation with commit:[{0}]", commitName));
-
-     Information(string.Format("Cloning repo [{0}] with branch [{2}] to [{1}]", 
-                docsRepoUrl, docsRepoFolder, defaultDocsBranch));
-
-     if(!System.IO.Directory.Exists(docsRepoFolder))
-     {   
-        System.IO.Directory.CreateDirectory(docsRepoFolder);   
-
-        var cloneCmd = new []{
-            string.Format("cd '{0}'", docsRepoFolder),
-            //string.Format("git clone -b {1} {0} --quiet > null 2>&1", docsRepoUrl, defaultDocsBranch)
-			string.Format("git clone -b {1} {0} --quiet", docsRepoUrl, defaultDocsBranch)
-        };
-
-        StartPowershellScript(string.Join(Environment.NewLine, cloneCmd));  
-     }                            
-
-     docsRepoFolder = docsRepoFolder + "/subpointsolutions-docs"; 
-
-     Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
-     var checkoutCmd = new []{
-            string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git checkout {0} --quiet > null 2>&1", defaultDocsBranch),
-            string.Format("git pull --quiet > null 2>&1")
-      };
-
-      StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
-
-      // there must be *.sln file after check out
-      // if not - then it means we failed to connect - check out
-      var hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
-      if(!hasSolutionFile) {
-          
-		  Information(string.Format("Cannot find *.sln file in folder:[{0}]", docsRepoFolder));
-		  Information(string.Format("Cleaning folder...", docsRepoFolder));
-		  // clean up and try again
-           System.IO.Directory.Delete(docsRepoFolder, true);
-
-          // again..
-         Information(string.Format("Checkout docs branch:[{0}]", defaultDocsBranch));
-         StartPowershellScript(string.Join(Environment.NewLine, checkoutCmd));  
-
-        hasSolutionFile =  System.IO.Directory.GetFiles(docsRepoFolder, "*.sln", System.IO.SearchOption.AllDirectories).Count() != 0;
-
-        if(!hasSolutionFile) {
-            throw new Exception(String.Format("Cannot check out docs repo. Can't find solution file in folder:[{0}]", docsRepoFolder));
-        }
-      }      
-
-      Information(string.Format("Merge and commit..."));
-      var mergeCmd = new List<String>();
-      
-      mergeCmd.Add(string.Format("cd '{0}'", docsRepoFolder));
-      mergeCmd.Add(string.Format("copy-item  '{0}' '{1}' -Recurse -Force", srcDocsPath,  dstDocsPath));
-
-	  // copying samples
-	  var defaultDocsSampleFilesFolder = (string)jsonConfig["defaultDocsSampleFilesFolder"];
-
-	  if(!String.IsNullOrEmpty(defaultDocsSampleFilesFolder))
-	  {
-		var defaultDocsSampleFilesFolderFullPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(defaultSolutionDirectory,defaultDocsSampleFilesFolder));
-		mergeCmd.Add(string.Format("copy-item  '{0}' '{1}' -Recurse -Force", defaultDocsSampleFilesFolderFullPath,  dstDocsSamplesPath));
-	  }
-
-      foreach(var defaultDocsFileExtension in defaultDocsFileExtensions) {
-        Verbose(String.Format(" - adding extension:[{0}]",defaultDocsFileExtension));
-        mergeCmd.Add(string.Format("git add {0} -f", defaultDocsFileExtension));
-      }
-
-      mergeCmd.Add(string.Format("git commit -m '{0}' --quiet > null 2>&1", commitName));
-
-      StartPowershellScript(string.Join(Environment.NewLine, mergeCmd)); 
-
-      Information(string.Format("Push to the main repo..."));
-      var pushCmd = new []{
-            string.Format("cd '{0}'", docsRepoFolder),
-            string.Format("git config http.sslVerify false"),
-			string.Format("git config --global push.default simple"),
-            string.Format("git push {0} --quiet > null 2>&1", docsRepoPushUrl),
-			string.Format("return $LASTEXITCODE")
-      };
-
-	  // writing a temporary PS file to avoid creds exposure in the build output
-      var pushCmdFilePath = System.IO.Path.GetTempFileName() + ".ps1";
-      System.IO.File.WriteAllLines(pushCmdFilePath, pushCmd);
-
-	  //   var res = StartPowershellScript(string.Join(Environment.NewLine, pushCmd), new PowershellSettings()
-	  //   {
-	  //         LogOutput = false,
-	  //         OutputToAppConsole  = false
-	  //   });
-
-      var res = StartPowershellFile(pushCmdFilePath, new PowershellSettings()
-      {
-            LogOutput = false,
-            OutputToAppConsole  = false
-      });
-
-      Information(string.Format("Completed docs merge.")); 
-});
-
-var defaultActionGitHubReleaseNotes = Task("Action-GitHub-ReleaseNotes")
-    .Does(() => {
-
-	if(jsonConfig["defaultGitGubReleaseNotesEnabled"] == null || ((bool)jsonConfig["defaultGitGubReleaseNotesEnabled"]) == false) {
-		 Information(String.Format("defaultGitGubReleaseNotesEnabled is null. Skipping GitHub releases..."));
- 		 return;
-	}
-
-    Information("Building GitHub release notes...");
-
-    string githubCompanyName = GetGlobalEnvironmentVariable("ci.github.companyname");
-    string githubRepositoryName = GetGlobalEnvironmentVariable("ci.github.repositoryname");
-    string githubUserName = GetGlobalEnvironmentVariable("ci.github.username");
-    string githubUserPassword = GetGlobalEnvironmentVariable("ci.github.userpassword");
-    
-    string releaseTitle = GetGlobalEnvironmentVariable("ci.github.releasetitle");
-    string releaseVersion = GetGlobalEnvironmentVariable("ci.github.releaseversion");
-    string releaseAssemblyFileVersion = GetGlobalEnvironmentVariable("ci.github.releaseAssemblyFileVersion");
-    
-    string releaseTemplateFileName = GetGlobalEnvironmentVariable("ci.github.releaseTemplateFileName");
-    
-    if(string.IsNullOrEmpty(releaseTemplateFileName))
-        releaseTemplateFileName = "github-release-notes.chtml";
-
-    string releaseLabels = GetGlobalEnvironmentVariable("ci.github.releaseLabels");
-
-    if(string.IsNullOrEmpty(githubCompanyName))
-        throw new Exception("githubCompanyName");
-
-    if(string.IsNullOrEmpty(githubRepositoryName))
-        throw new Exception("githubRepositoryName");        
-
-    if(string.IsNullOrEmpty(githubUserName))
-        throw new Exception("githubUserName");        
-
-    if(string.IsNullOrEmpty(githubUserPassword))
-        throw new Exception("githubUserPassword");        
-
-    if(string.IsNullOrEmpty(releaseLabels))
-        throw new Exception("releaseLabels");        
-
-    if(String.IsNullOrEmpty(releaseTitle))
-    {
-        releaseTitle = System.IO.Path.GetFileNameWithoutExtension(defaultSolutionFilePath);
-    }
-
-	// get releaseVersion from one of the defaultNuspecs?
-    if(String.IsNullOrEmpty(releaseVersion) && defaultNuspecs.Count > 0)
-    {
-        var nuSpec = defaultNuspecs.First();
-        
-        var id = nuSpec.Id; 
-        var version = nuSpec.Version; 
-
-        if(ciBranch != "master")
-            releaseVersion = GetVersionForNuGetPackage(id, "beta");
-        else
-            releaseVersion = GetVersionForNuGetPackage(id, ciBranch);
-    }
-
-	// fall back on defaultNuspecVersion
-	if(String.IsNullOrEmpty(releaseVersion))
-		releaseVersion = defaultNuspecVersion;
-
-	if(String.IsNullOrEmpty(releaseVersion))
-	{
-		throw new Exception("releaseVersion is null or empty. Can't get it from 'ci.github.releaseversion', any of NuSpec files or defaultNuspecVersion");
-	}
-
-    Information(String.Format("-githubCompanyName:[{0}]",githubCompanyName));
-    Information(String.Format("-githubRepositoryName:[{0}]", githubRepositoryName));
-
-    Information(String.Format("-releaseTemplateFileName:[{0}]", releaseTemplateFileName));
-    Information(String.Format("-releaseLabels:[{0}]", releaseLabels));
-
-    var releaseNotesFilePath = CreateGitHubReleaseNotes(
-        githubCompanyName,
-        githubRepositoryName,
-
-        githubUserName,
-        githubUserPassword,
-
-        releaseTitle,
-        releaseVersion,
-
-        releaseAssemblyFileVersion,
-
-        releaseTemplateFileName,
-        releaseLabels
-    );
-});
-
-
 var defaultActionWebAppPackage = Task("Action-WebApp-Packaging")
     .Does(() =>
 {
@@ -1797,6 +1188,7 @@ var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
 });
 
 // Action-XXX - common tasks
+
 // * Action-Validate-Environment
 // * Action-Clean
 // * Action-Restore-NuGet-Packages
@@ -1811,8 +1203,6 @@ var defaultActionWebAppDeploy = Task("Action-WebApp-Publishing")
 
 // * Action-CLI-Chocolatey-Packaging
 // * Action-CLI-Chocolatey-Publishing
-
-// * Action-GitHub-ReleaseNotes
 
 // * Action-WebApp-Packaging
 // * Action-WebApp-Publishing
@@ -1876,14 +1266,10 @@ var taskDefaultCI = Task("Default-CI")
     // always 'push'
     // the action checks if the current branch has to be published 
     // (dev always, the rest goes via 'ci.nuget.shouldpublish' / 'ci.chocolatey.shouldpublish')
+    
     .IsDependentOn("Action-API-NuGet-Publishing")
     .IsDependentOn("Action-CLI-Chocolatey-Publishing")
-    .IsDependentOn("Action-WebApp-Publishing")
-	
-	// always create a new release - either in draft or published as per 'ci.github.shouldpublish' variable
-	.IsDependentOn("Action-GitHub-ReleaseNotes")
-
-	.IsDependentOn("Action-Docs-Merge");
+    .IsDependentOn("Action-WebApp-Publishing");
 
 var taskDefaultCILocal = Task("Default-CI-Local")
     .IsDependentOn("Default-Run-UnitTests")
