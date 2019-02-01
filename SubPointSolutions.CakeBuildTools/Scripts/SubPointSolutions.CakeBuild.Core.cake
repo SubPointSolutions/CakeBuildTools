@@ -5,7 +5,7 @@
 #addin nuget:https://www.nuget.org/api/v2/?package=NuGet.Core&Version=2.14.0
 #addin nuget:https://www.nuget.org/api/v2/?package=Cake.WebDeploy&Version=0.3.3
 
-var version = "0.2.0-beta1";
+var version = "0.2.1902-beta2";
 
 Information("Running SubPointSolutions.CakeBuildTools: " + version);
 
